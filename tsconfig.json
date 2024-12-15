@@ -1,0 +1,18 @@
+// tsconfig.json
+{
+	"compilerOptions": {
+		"target": "ES2019",
+		"module": "ESNext",
+		"lib": ["DOM", "ES2019"],
+		"jsx": "react",
+		"strict": true,
+		"esModuleInterop": true,
+		"moduleResolution": "Node",
+		"outDir": "dist",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true
+	},
+	"include": ["src", "jest.setup.ts", "__tests__"],
+	"exclude": ["src/**/*.test.ts"]
+}

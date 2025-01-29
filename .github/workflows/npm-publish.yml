@@ -34,6 +34,43 @@ jobs:
         id: get_latest_tag
         run: echo "LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")" >> $GITHUB_ENV
 
+      - name: Debugging version determination
+        run: |
+          set -x  # 각 명령어 실행 로그 출력
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "LATEST_TAG=$LATEST_TAG"
+
+          VERSION=${LATEST_TAG#v}
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          else
+            echo "Invalid version format, defaulting to v0.0.1"
+            MAJOR=0
+            MINOR=0
+            PATCH=0
+          fi
+
+          echo "Version components: MAJOR=$MAJOR, MINOR=$MINOR, PATCH=$PATCH"
+
+          CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
+          echo "Commit messages: $CHANGES"
+
+          if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
+            ((MAJOR++))
+            MINOR=0
+            PATCH=0
+          elif echo "$CHANGES" | grep -iqE 'feat:'; then
+            ((MINOR++))
+            PATCH=0
+          else
+            ((PATCH++))
+          fi
+
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "NEW_VERSION=$NEW_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        shell: bash
+
       - name: Determine next version
         id: versioning
         run: |

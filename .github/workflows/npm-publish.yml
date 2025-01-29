@@ -87,7 +87,12 @@ jobs:
             Json-VR-Cache-${{ env.NEW_VERSION }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Update package.json version
+        run: |
+          npm version --no-git-tag-version ${{ env.NEW_VERSION }}
+          cat package.json
+
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

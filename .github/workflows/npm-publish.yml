@@ -76,12 +76,15 @@ jobs:
         run: |
           git tag ${{ env.NEW_VERSION }}
           git push origin ${{ env.NEW_VERSION }}
+      - name: Compress build output
+        run: zip -r Json-VR-Cache-${{ env.NEW_VERSION }}.zip dist/
+
       - name: Create GitHub Release
         run: |
           gh release create ${{ env.NEW_VERSION }} \
             --title "Release ${{ env.NEW_VERSION }}" \
             --notes "자동 생성된 릴리즈입니다." \
-            dist/*
+            Json-VR-Cache-${{ env.NEW_VERSION }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to npm

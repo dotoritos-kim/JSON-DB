@@ -1,19 +1,40 @@
 {
 	"name": "json-vr-cache",
 	"version": "1.0.0",
-	"description": "Easy to use indexedDB + vram",
+	"description": "VRAM JSON cache with IndexedDB integration, built with TypeScript.",
 	"main": "dist/Json-VR-Cache.cjs.js",
 	"module": "dist/Json-VR-Cache.esm.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"test": "jest",
 		"build": "rollup -c"
+	},
+	"typesVersions": {
+		"*": {
+			"dist/types/*": [
+				"dist/types/*"
+			],
+			"dist/utils.d.ts": [
+				"dist/utils.d.ts"
+			],
+			"dist/VramDataBase.d.ts": [
+				"dist/VramDataBase.d.ts"
+			],
+			"dist/JsonGpuStore.d.ts": [
+				"dist/JsonGpuStore.d.ts"
+			]
+		}
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/dotoritos-kim/Json-VR-Cache.git"
 	},
 	"keywords": [
-		"indexedDB"
+		"indexedDB",
+		"json",
+		"typescript",
+		"javascript",
+		"proxy"
 	],
 	"author": "",
 	"type": "module",

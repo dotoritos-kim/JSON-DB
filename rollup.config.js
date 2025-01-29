@@ -7,17 +7,17 @@ export default {
 	input: "src/JsonGpuStore.ts", // 엔트리 파일
 	output: [
 		{
-			file: "dist/JSON-DB.cjs.js", // CommonJS 출력
+			file: "dist/Json-VR-Cache.cjs.js", // CommonJS 출력
 			format: "cjs",
 			sourcemap: true,
 		},
 		{
-			file: "dist/JSON-DB.esm.js", // ESM 출력
+			file: "dist/Json-VR-Cache.esm.js", // ESM 출력
 			format: "esm",
 			sourcemap: true,
 		},
 		{
-			file: "dist/JSON-DB.min.js",
+			file: "dist/Json-VR-Cache.min.js",
 			format: "esm",
 			plugins: [
 				terser({

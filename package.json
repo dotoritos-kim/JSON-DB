@@ -1,7 +1,7 @@
 {
-	"name": "json-db",
+	"name": "json-vr-cache",
 	"version": "1.0.0",
-	"description": "Easy to use indexedDB",
+	"description": "Easy to use indexedDB + vram",
 	"main": "index.js",
 	"scripts": {
 		"test": "jest",
@@ -9,7 +9,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/dotoritos-kim/JSON-DB.git"
+		"url": "git+https://github.com/dotoritos-kim/Json-VR-Cache.git"
 	},
 	"keywords": [
 		"indexedDB"
@@ -18,10 +18,10 @@
 	"type": "module",
 	"license": "ISC",
 	"bugs": {
-		"url": "https://github.com/dotoritos-kim/JSON-DB/issues"
+		"url": "https://github.com/dotoritos-kim/Json-VR-Cache/issues"
 	},
 	"private": false,
-	"homepage": "https://github.com/dotoritos-kim/JSON-DB#readme",
+	"homepage": "https://github.com/dotoritos-kim/Json-VR-Cache#readme",
 	"devDependencies": {
 		"@babel/preset-typescript": "^7.26.0",
 		"@rollup/plugin-commonjs": "^28.0.1",

@@ -1,9 +1,9 @@
-# JSON-DB
+# Json-VR-Cache
 
 ## 소개 (Introduction)
 
 **한국어(KR)**  
-**JSON-DB**는 WebGPU를 활용해 대용량 JSON 데이터를 GPU 메모리에 효율적으로 저장하고, CPU에는 메타데이터만 두어 빠른 연산과 정렬을 가능하게 하는 프로젝트입니다. `JsonGpuStore`와 `VramDataBase` 클래스 등을 통해 JSON, TypedArray, ArrayBuffer 형태의 데이터 관리 및 GPU 정렬 기능을 제공합니다.
+**Json-VR-Cache**는 WebGPU를 활용해 대용량 JSON 데이터를 GPU 메모리에 효율적으로 저장하고, CPU에는 메타데이터만 두어 빠른 연산과 정렬을 가능하게 하는 프로젝트입니다. `JsonGpuStore`와 `VramDataBase` 클래스 등을 통해 JSON, TypedArray, ArrayBuffer 형태의 데이터 관리 및 GPU 정렬 기능을 제공합니다.
 
 ---
 
@@ -43,8 +43,8 @@
 ### 1. 저장소 클론 & 의존성 설치 (Clone & Install)
 
 ```bash
-git clone https://github.com/<username>/JSON-DB.git
-cd JSON-DB
+git clone https://github.com/<username>/Json-VR-Cache.git
+cd Json-VR-Cache
 npm install
 ```
 
@@ -137,7 +137,7 @@ export function useJsonDB(storeName: string, options?: IDBOptions) {
 ## 디렉토리 구조 (Directory Structure)
 
 ```plaintext
-JSON-DB/
+Json-VR-Cache/
 ├── VramDataBase.ts       # WebGPU 기반 데이터베이스 핵심 로직
 ├── JsonGpuStore.ts       # Proxy 기반 JSON 관리 클래스
 ├── types

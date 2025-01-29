@@ -1,11 +1,11 @@
-# JSON-DB
+# Json-VR-Cache
 
-[README](https://github.com/dotoritos-kim/JSON-DB/blob/main/README.md)
-[README-KR](https://github.com/dotoritos-kim/JSON-DB/blob/main/README-KR.md)
+[README](https://github.com/dotoritos-kim/Json-VR-Cache/blob/main/README.md)
+[README-KR](https://github.com/dotoritos-kim/Json-VR-Cache/blob/main/README-KR.md)
 
 ## Introduction
 
-**JSON-DB** is a project that leverages WebGPU to efficiently store large-scale JSON data in GPU memory, keeping only metadata in CPU memory for fast operations and sorting. By using classes like `JsonGpuStore` and `VramDataBase`, you can manage data in JSON, TypedArray, or ArrayBuffer formats, and perform GPU-based sorting.
+**Json-VR-Cache** is a project that leverages WebGPU to efficiently store large-scale JSON data in GPU memory, keeping only metadata in CPU memory for fast operations and sorting. By using classes like `JsonGpuStore` and `VramDataBase`, you can manage data in JSON, TypedArray, or ArrayBuffer formats, and perform GPU-based sorting.
 
 ---
 
@@ -39,8 +39,8 @@
 ### 1. Clone & Install Dependencies
 
 ```bash
-git clone https://github.com/<username>/JSON-DB.git
-cd JSON-DB
+git clone https://github.com/<username>/Json-VR-Cache.git
+cd Json-VR-Cache
 npm install
 ```
 
@@ -133,7 +133,7 @@ export function useJsonDB(storeName: string, options?: IDBOptions) {
 ## Directory Structure
 
 ```plaintext
-JSON-DB/
+Json-VR-Cache/
 ├── VramDataBase.ts       # Core WebGPU-based database logic
 ├── JsonGpuStore.ts       # Proxy-based JSON management
 ├── types

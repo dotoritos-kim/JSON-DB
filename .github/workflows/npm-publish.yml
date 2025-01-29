@@ -25,6 +25,10 @@ jobs:
 
       - name: Build project
         run: npm run build
+      - name: Debug latest tag
+        run: |
+          git fetch --tags
+          echo "Latest tag: $(git describe --tags --abbrev=0 2>/dev/null || echo "No tags found")"
 
       - name: Get latest tag
         id: get_latest_tag
@@ -33,35 +37,36 @@ jobs:
       - name: Determine next version
         id: versioning
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$LATEST_TAG" ]; then
-            echo "No previous tag found, starting from v0.0.1"
-            NEW_VERSION="v0.0.1"
-          else
-            echo "Latest tag: $LATEST_TAG"
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
 
-            # Extract major, minor, patch from latest tag
-            VERSION=${LATEST_TAG#v}
+          # Extract version components safely
+          VERSION=${LATEST_TAG#v}
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-
-            # Get commit messages since last tag
-            CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
-
-            # Determine version bump type
-            if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
-              ((MAJOR++))
-              MINOR=0
-              PATCH=0
-            elif echo "$CHANGES" | grep -iqE 'feat:'; then
-              ((MINOR++))
-              PATCH=0
-            else
-              ((PATCH++))
-            fi
-
-            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          else
+            echo "Invalid version format, defaulting to v0.0.1"
+            MAJOR=0
+            MINOR=0
+            PATCH=0
           fi
 
+          # Get commit messages since last tag
+          CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
+
+          # Determine version bump type
+          if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
+            ((MAJOR++))
+            MINOR=0
+            PATCH=0
+          elif echo "$CHANGES" | grep -iqE 'feat:'; then
+            ((MINOR++))
+            PATCH=0
+          else
+            ((PATCH++))
+          fi
+
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "Next version: $NEW_VERSION"
 

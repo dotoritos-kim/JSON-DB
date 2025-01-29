@@ -34,9 +34,11 @@ jobs:
         id: get_latest_tag
         run: echo "LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")" >> $GITHUB_ENV
 
-      - name: Debugging version determination
+      - name: Determine next version
+        id: versioning
         run: |
-          set -x  # 각 명령어 실행 로그 출력
+          set -x  # 디버깅 활성화
+          
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "LATEST_TAG=$LATEST_TAG"
 
@@ -50,62 +52,32 @@ jobs:
             PATCH=0
           fi
 
+          # 변수 기본값 설정
+          if [ -z "$MAJOR" ]; then MAJOR=0; fi
+          if [ -z "$MINOR" ]; then MINOR=0; fi
+          if [ -z "$PATCH" ]; then PATCH=0; fi
+
           echo "Version components: MAJOR=$MAJOR, MINOR=$MINOR, PATCH=$PATCH"
 
           CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
           echo "Commit messages: $CHANGES"
 
+          set +e  # 🔥 오류 방지용
           if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
             ((MAJOR++))
             MINOR=0
             PATCH=0
-          elif echo "$CHANGES" | grep -iqE 'feat:'; then
+          elif echo "$CHANGES" | grep -iqE 'feat:' || true; then
             ((MINOR++))
             PATCH=0
           else
             ((PATCH++))
           fi
+          set -e  # 다시 활성화
 
           NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Determine next version
-        id: versioning
-        run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Latest tag: $LATEST_TAG"
-
-          # Extract version components safely
-          VERSION=${LATEST_TAG#v}
-          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-          else
-            echo "Invalid version format, defaulting to v0.0.1"
-            MAJOR=0
-            MINOR=0
-            PATCH=0
-          fi
-
-          # Get commit messages since last tag
-          CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
-
-          # Determine version bump type
-          if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
-            ((MAJOR++))
-            MINOR=0
-            PATCH=0
-          elif echo "$CHANGES" | grep -iqE 'feat:'; then
-            ((MINOR++))
-            PATCH=0
-          else
-            ((PATCH++))
-          fi
-
-          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
-          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          echo "Next version: $NEW_VERSION"
 
 
       - name: Setup Git authentication

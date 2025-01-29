@@ -4,7 +4,7 @@ import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
 import obfuscator from "rollup-plugin-obfuscator";
 export default {
-	input: "src/index.ts", // 엔트리 파일
+	input: "src/JsonGpuStore.ts", // 엔트리 파일
 	output: [
 		{
 			file: "dist/JSON-DB.cjs.js", // CommonJS 출력

@@ -11,6 +11,7 @@
 		"declaration": true,
 		"declarationMap": true,
 		"sourceMap": true,
+		"rootDir": "src",
 		"typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
 	},
 	"include": ["src", "jest.setup.ts", "__tests__"],

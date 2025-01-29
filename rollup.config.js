@@ -7,17 +7,17 @@ export default {
 	input: "src/index.ts", // 엔트리 파일
 	output: [
 		{
-			file: "dist/index.cjs.js", // CommonJS 출력
+			file: "dist/JSON-DB.cjs.js", // CommonJS 출력
 			format: "cjs",
 			sourcemap: true,
 		},
 		{
-			file: "dist/index.esm.js", // ESM 출력
+			file: "dist/JSON-DB.esm.js", // ESM 출력
 			format: "esm",
 			sourcemap: true,
 		},
 		{
-			file: "dist/bundle.min.js",
+			file: "dist/JSON-DB.min.js",
 			format: "esm",
 			plugins: [
 				terser({

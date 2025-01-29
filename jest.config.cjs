@@ -1,6 +1,6 @@
 // jest.config.cjs
 module.exports = {
-	preset: "ts-jest",
+	preset: "jest-puppeteer",
 	testEnvironment: "jsdom",
 	setupFiles: ["fake-indexeddb/auto"],
 	setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],

@@ -33,32 +33,44 @@ jobs:
       - name: Determine next version
         id: versioning
         run: |
-          LATEST_TAG=${{ env.LATEST_TAG }}
-          echo "Latest tag: $LATEST_TAG"
-
-          # Extract major, minor, patch from latest tag
-          VERSION=${LATEST_TAG#v}
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
-
-          # Get commit messages since last tag
-          CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
-
-          # Determine version bump type
-          if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
-            ((MAJOR++))
-            MINOR=0
-            PATCH=0
-          elif echo "$CHANGES" | grep -iqE 'feat:'; then
-            ((MINOR++))
-            PATCH=0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous tag found, starting from v0.0.1"
+            NEW_VERSION="v0.0.1"
           else
-            ((PATCH++))
+            echo "Latest tag: $LATEST_TAG"
+
+            # Extract major, minor, patch from latest tag
+            VERSION=${LATEST_TAG#v}
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+            # Get commit messages since last tag
+            CHANGES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" || echo "")
+
+            # Determine version bump type
+            if echo "$CHANGES" | grep -iqE 'BREAKING CHANGE|major:'; then
+              ((MAJOR++))
+              MINOR=0
+              PATCH=0
+            elif echo "$CHANGES" | grep -iqE 'feat:'; then
+              ((MINOR++))
+              PATCH=0
+            else
+              ((PATCH++))
+            fi
+
+            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           fi
 
-          # New version
-          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
           echo "Next version: $NEW_VERSION"
+
+
+      - name: Setup Git authentication
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Create Git tag
         run: |

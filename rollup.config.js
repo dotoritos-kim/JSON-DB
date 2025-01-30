@@ -11,12 +11,40 @@ export default {
 			format: "cjs",
 			sourcemap: true,
 			inlineDynamicImports: true,
+			plugins: [
+				terser({
+					compress: {
+						drop_console: true, // console.log 제거
+						drop_debugger: true, // debugger 제거
+					},
+					mangle: {
+						toplevel: true, // 최상위 스코프의 변수명도 난독화
+					},
+					output: {
+						comments: false, // 주석 제거
+					},
+				}),
+			],
 		},
 		{
 			file: "dist/Json-VR-Cache.esm.js", // ESM 출력
 			format: "esm",
 			sourcemap: true,
 			inlineDynamicImports: true,
+			plugins: [
+				terser({
+					compress: {
+						drop_console: true, // console.log 제거
+						drop_debugger: true, // debugger 제거
+					},
+					mangle: {
+						toplevel: true, // 최상위 스코프의 변수명도 난독화
+					},
+					output: {
+						comments: false, // 주석 제거
+					},
+				}),
+			],
 		},
 		{
 			file: "dist/Json-VR-Cache.min.js",

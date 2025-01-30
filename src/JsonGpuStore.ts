@@ -1,6 +1,5 @@
 import { IDBOptions } from "./types/StoreMetadata";
 import { VramDataBase } from "./VramDataBase";
-
 /**
  * WebGPU 디바이스를 요청하여 반환하는 유틸리티
  */
@@ -56,7 +55,7 @@ export class JsonGpuStore<T extends object> {
 		const device = await getWebGpuDevice();
 		this.vramDB = new VramDataBase(device);
 
-		this.vramDB.createObjectStore(
+		this.vramDB.StoreManager.createObjectStore(
 			storeName,
 			options ?? {
 				dataType: "JSON",
@@ -64,9 +63,12 @@ export class JsonGpuStore<T extends object> {
 				totalRows: 1,
 			}
 		);
+		await this.vramDB.initializeManager();
 
 		// 초기 데이터 저장
-		this.vramDB.put(storeName, this.key, this.cache).catch(console.error);
+		this.vramDB.StoreManager.put(storeName, this.key, this.cache).catch(
+			console.error
+		);
 	}
 
 	/**
@@ -94,7 +96,7 @@ export class JsonGpuStore<T extends object> {
 				set: (target, prop, newValue, receiver) => {
 					Reflect.set(target, prop, newValue, receiver);
 
-					this.vramDB!.put(
+					this.vramDB!.StoreManager.put(
 						this.storeName,
 						this.key,
 						this.cache

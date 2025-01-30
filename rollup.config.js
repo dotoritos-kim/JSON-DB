@@ -10,11 +10,13 @@ export default {
 			file: "dist/Json-VR-Cache.cjs.js", // CommonJS 출력
 			format: "cjs",
 			sourcemap: true,
+			inlineDynamicImports: true,
 		},
 		{
 			file: "dist/Json-VR-Cache.esm.js", // ESM 출력
 			format: "esm",
 			sourcemap: true,
+			inlineDynamicImports: true,
 		},
 		{
 			file: "dist/Json-VR-Cache.min.js",
@@ -33,6 +35,8 @@ export default {
 					},
 				}),
 			],
+			sourcemap: true,
+			inlineDynamicImports: true,
 		},
 	],
 	plugins: [

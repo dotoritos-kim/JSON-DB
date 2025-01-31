@@ -40,7 +40,6 @@ export class JsonGpuStore<T extends object> {
 	public async init(options?: IDBOptions) {
 		const device = await getWebGpuDevice();
 		this.vramDB = new VramDataBase(device);
-		await this.vramDB.initializeManager();
 		this.vramDB.StoreManager.createObjectStore(
 			this.storeName,
 			options ?? {

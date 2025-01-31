@@ -21,13 +21,6 @@ export default [
 			commonjs(),
 			typescript(),
 			dynamicImport(),
-			obfuscator({
-				rotateStringArray: false, // 문자열 배열 회전 비활성화
-				stringArray: false, // 문자열 배열 생성 비활성화
-				stringArrayEncoding: [], // 문자열 배열 인코딩 비활성화
-				reservedStrings: [/import\(/], // 'import(' 패턴을 포함한 문자열 보호
-				// 기타 필요한 옵션 추가
-			}),
 			/*terser({
 				compress: { drop_console: true, drop_debugger: true },
 				output: { comments: false },
@@ -51,13 +44,6 @@ export default [
 			commonjs(),
 			typescript(),
 			dynamicImport(),
-			obfuscator({
-				rotateStringArray: false, // 문자열 배열 회전 비활성화
-				stringArray: false, // 문자열 배열 생성 비활성화
-				stringArrayEncoding: [], // 문자열 배열 인코딩 비활성화
-				reservedStrings: [/import\(/], // 'import(' 패턴을 포함한 문자열 보호
-				// 기타 필요한 옵션 추가
-			}),
 			/*terser({
 				compress: { drop_console: true, drop_debugger: true },
 				output: { comments: false },

@@ -32,11 +32,11 @@ export class VramDataBase {
 	protected dateParseCache = new Map<string, number>();
 	protected stringCache = new Map<string, Uint32Array>();
 
-	public FlushManager!: FlushManager;
-	public GpuBufferAllocator!: GpuBufferAllocator;
-	public SerializationManager!: SerializationManager;
-	public SortManager!: SortManager;
-	public StoreManager!: StoreManager;
+	public FlushManager: FlushManager;
+	public GpuBufferAllocator: GpuBufferAllocator;
+	public SerializationManager: SerializationManager;
+	public SortManager: SortManager;
+	public StoreManager: StoreManager;
 	/**
 	 * VramDataBase 클래스를 초기화한다.
 	 * @param {GPUDevice} device - 버퍼 작업에 사용할 GPU 디바이스
@@ -44,33 +44,11 @@ export class VramDataBase {
 	constructor(public device: GPUDevice) {
 		this.storeMetadataMap = new Map();
 		this.storeKeyMap = new Map();
-	}
-
-	async initializeManager() {
-		try {
-			const [
-				{ FlushManager },
-				{ GpuBufferAllocator },
-				{ SerializationManager },
-				{ StoreManager },
-				{ SortManager },
-			] = await Promise.all([
-				import("./Manager/FlushManager"),
-				import("./Manager/GpuBufferAllocator"),
-				import("./Manager/SerializationManager"),
-				import("./Manager/StoreManager"),
-				import("./Manager/SortManager"),
-			]);
-
-			this.StoreManager = new StoreManager(this.device);
-			this.SortManager = new SortManager(this.device);
-			this.SerializationManager = new SerializationManager(this.device);
-			this.FlushManager = new FlushManager(this.device);
-			this.GpuBufferAllocator = new GpuBufferAllocator(this.device);
-		} catch (error) {
-			console.error("Manager 초기화 중 에러 발생:", error);
-			// 필요한 경우 추가적인 에러 처리 로직을 여기에 작성
-		}
+		this.StoreManager = new StoreManager(this.device);
+		this.SortManager = new SortManager(this.device);
+		this.SerializationManager = new SerializationManager(this.device);
+		this.FlushManager = new FlushManager(this.device);
+		this.GpuBufferAllocator = new GpuBufferAllocator(this.device);
 	}
 
 	/**

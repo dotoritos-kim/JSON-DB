@@ -76,8 +76,8 @@
 	},
 	"exports": {
 		".": {
-			"import": "./dist/index.cjs.js",
-			"require": "./dist/index.cjs.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.js"
 		}
 	},
 	"files": [

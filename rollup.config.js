@@ -5,81 +5,34 @@ import terser from "@rollup/plugin-terser";
 import obfuscator from "rollup-plugin-obfuscator";
 export default {
 	input: "src/index.ts", // 엔트리 파일
-	output: [
-		{
-			file: "dist/Json-VR-Cache.cjs.js", // CommonJS 출력
-			format: "cjs",
-			sourcemap: true,
-			inlineDynamicImports: true,
-			plugins: [
-				terser({
-					compress: {
-						drop_console: true, // console.log 제거
-						drop_debugger: true, // debugger 제거
-					},
-					mangle: {
-						toplevel: true, // 최상위 스코프의 변수명도 난독화
-					},
-					output: {
-						comments: false, // 주석 제거
-					},
-				}),
-			],
-		},
-		{
-			file: "dist/Json-VR-Cache.esm.js", // ESM 출력
-			format: "esm",
-			sourcemap: true,
-			inlineDynamicImports: true,
-			plugins: [
-				terser({
-					compress: {
-						drop_console: true, // console.log 제거
-						drop_debugger: true, // debugger 제거
-					},
-					mangle: {
-						toplevel: true, // 최상위 스코프의 변수명도 난독화
-					},
-					output: {
-						comments: false, // 주석 제거
-					},
-				}),
-			],
-		},
-		{
-			file: "dist/Json-VR-Cache.min.js",
-			format: "esm",
-			plugins: [
-				terser({
-					compress: {
-						drop_console: true, // console.log 제거
-						drop_debugger: true, // debugger 제거
-					},
-					mangle: {
-						toplevel: true, // 최상위 스코프의 변수명도 난독화
-					},
-					output: {
-						comments: false, // 주석 제거
-					},
-				}),
-			],
-			sourcemap: true,
-			inlineDynamicImports: true,
-		},
-	],
+	output: {
+		dir: "dist", // ⚠️ output.file 대신 output.dir 사용
+		format: "esm",
+		sourcemap: true,
+		preserveModules: true, // 개별 모듈을 유지 (필요 시)
+		entryFileNames: "[name].js", // 파일 이름 패턴 설정
+	},
 	plugins: [
-		resolve(), // Node.js 모듈 해석
-		commonjs(), // CommonJS 모듈 변환
-		typescript(), // TypeScript 컴파일
-
+		resolve(),
+		commonjs(),
+		typescript(),
+		terser({
+			compress: { drop_console: true, drop_debugger: true },
+			output: { comments: false },
+		}),
 		obfuscator({
-			compact: true,
-			controlFlowFlattening: true, // 제어 흐름 난독화
+			compact: true, // 코드 압축
+			controlFlowFlattening: true, // 제어 흐름 플래튼화
+			controlFlowFlatteningThreshold: 1, // 제어 흐름 플래튼화 적용 확률
 			deadCodeInjection: true, // 죽은 코드 삽입
-			debugProtection: true, // 디버깅 방지
-			stringArray: true, // 문자열 난독화
-			stringArrayThreshold: 0.75, // 문자열 난독화 비율
+			deadCodeInjectionThreshold: 1, // 죽은 코드 삽입 확률
+			stringArray: true, // 문자열을 배열로 변환
+			stringArrayEncoding: ["base64"], // Base64로 문자열 인코딩
+			stringArrayThreshold: 1, // 모든 문자열을 배열로 변환
+			disableConsoleOutput: true, // console.log 등 출력 제거
+			renameGlobals: true, // 전역 변수 이름 변경
+			identifierNamesGenerator: "mangled", // 변수 및 함수명을 짧고 의미 없는 이름으로 변경
 		}),
 	],
-	external: ["react"], // 외부 의존성 제외
+	external: (id) => /^react/.test(id), // React 관련 패키지만 외부로 설정
 };

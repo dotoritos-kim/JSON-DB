@@ -9,6 +9,9 @@ import { padJsonTo4Bytes, padTo4Bytes, ROW_INACTIVE_FLAG } from "../utils";
 import { VramDataBase } from "../VramDataBase";
 
 export class SerializationManager extends VramDataBase {
+	constructor(device: GPUDevice) {
+		super(device);
+	}
 	/**
 	 * 값(JSON, TypedArray, ArrayBuffer 등)을 GPU 버퍼에 기록하기 적합한 ArrayBuffer로 직렬화한다.
 	 *

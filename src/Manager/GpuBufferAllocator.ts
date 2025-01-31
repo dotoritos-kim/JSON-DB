@@ -3,6 +3,9 @@ import { roundUp } from "../utils";
 import { VramDataBase } from "../VramDataBase";
 
 export class GpuBufferAllocator extends VramDataBase {
+	constructor(device: GPUDevice) {
+		super(device);
+	}
 	/**
 	 * 새 GPU 버퍼를 생성하여 반환한다.
 	 *

@@ -8,6 +8,9 @@ import { compareKeys, likeToRegex, ROW_INACTIVE_FLAG } from "../utils";
 import { VramDataBase } from "../VramDataBase";
 
 export class StoreManager extends VramDataBase {
+	constructor(device: GPUDevice) {
+		super(device);
+	}
 	/**
 	 * 지정된 구성 옵션을 사용하여 새 오브젝트 스토어를 생성한다.
 	 * 만약 `dataType: "JSON"`이고, 하나 이상의 `sortDefinition`이 존재한다면

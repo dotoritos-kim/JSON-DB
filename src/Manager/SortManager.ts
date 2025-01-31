@@ -2,6 +2,9 @@ import { SortDefinition, StoreMetadata } from "../types/StoreMetadata";
 import { VramDataBase } from "../VramDataBase";
 
 export class SortManager extends VramDataBase {
+	constructor(device: GPUDevice) {
+		super(device);
+	}
 	/**
 	 * 사용자 정의 문자열 키 범위(lower/upper, inclusivity 등)를 적용해 배열의 키를 필터링한다.
 	 *

@@ -2,6 +2,9 @@ import { PendingWrite } from "../types/StoreMetadata";
 import { VramDataBase } from "../VramDataBase";
 
 export class FlushManager extends VramDataBase {
+	constructor(device: GPUDevice) {
+		super(device);
+	}
 	/**
 	 * 대기 중인 쓰기가 임계치에 도달했거나, 다른 조건으로 인해 flush가 필요하면 flush를 수행한다.
 	 *

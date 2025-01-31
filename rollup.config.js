@@ -12,7 +12,7 @@ export default [
 			dir: "dist",
 			format: "esm",
 			sourcemap: true,
-			preserveModules: true, // ✅ 모듈 구조 유지
+			preserveModules: true, // 모듈 구조 유지
 			preserveModulesRoot: "src",
 			entryFileNames: "[name].js", // 파일명 유지
 		},
@@ -25,17 +25,6 @@ export default [
 				output: { comments: false },
 			}),
 			dynamicImport(),
-			obfuscator({
-				compact: true,
-				controlFlowFlattening: false,
-				deadCodeInjection: false,
-				stringArray: true,
-				stringArrayEncoding: ["base64"],
-				stringArrayThreshold: 0.75,
-				disableConsoleOutput: true,
-				renameGlobals: false,
-				identifierNamesGenerator: "hexadecimal",
-			}),
 		],
 		external: ["react"],
 	}, // CJS 번들

@@ -29,34 +29,20 @@ export class JsonGpuStore<T extends object> {
 	 * @param storeName 스토어 이름
 	 * @param key 저장할 키 값
 	 * @param initialData 초기 데이터 (JSON 형태)
-	 * @param options IDBOptions 옵션
 	 */
-	constructor(
-		storeName: string,
-		key: string,
-		initialData: T,
-		options?: IDBOptions
-	) {
+	constructor(storeName: string, key: string, initialData: T) {
 		this.storeName = storeName;
 		this.key = key;
 		this.cache = structuredClone(initialData);
-
-		// WebGPU 초기화 후 VRAM DB 설정
-		this.initializeVramDB(storeName, options);
-
-		// Proxy 적용
 		this.proxy = this.createProxy(this.cache);
 	}
 
-	/**
-	 * VRAM 데이터베이스를 초기화하는 함수
-	 */
-	private async initializeVramDB(storeName: string, options?: IDBOptions) {
+	public async init(options?: IDBOptions) {
 		const device = await getWebGpuDevice();
 		this.vramDB = new VramDataBase(device);
 
 		this.vramDB.StoreManager.createObjectStore(
-			storeName,
+			this.storeName,
 			options ?? {
 				dataType: "JSON",
 				bufferSize: 256 * 1024 * 1024,
@@ -66,9 +52,11 @@ export class JsonGpuStore<T extends object> {
 		await this.vramDB.initializeManager();
 
 		// 초기 데이터 저장
-		this.vramDB.StoreManager.put(storeName, this.key, this.cache).catch(
-			console.error
-		);
+		this.vramDB.StoreManager.put(
+			this.storeName,
+			this.key,
+			this.cache
+		).catch(console.error);
 	}
 
 	/**

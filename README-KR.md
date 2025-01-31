@@ -60,7 +60,9 @@ npm run build
 
 ```ts
 const initialData = { count: 0, nested: { value: 10 } };
-const jsonGpu = new JsonGpuStore("HighLevelStore", "myKey", initialData, {
+const jsonGpu = new JsonGpuStore("HighLevelStore", "myKey", initialData);
+
+await jsonGPU.init({
 	dataType: "JSON",
 	bufferSize: 1024 * 1024,
 	totalRows: 1,
@@ -108,6 +110,7 @@ export function useJsonDB(storeName: string, options?: IDBOptions) {
 						totalRows: 1,
 					}
 				);
+				await db.initializeManager();
 
 				if (isMounted) {
 					setJsonDB(db);

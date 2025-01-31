@@ -32,9 +32,9 @@ export class VramDataBase {
 	protected dateParseCache = new Map<string, number>();
 	protected stringCache = new Map<string, Uint32Array>();
 
-	protected FlushManager!: FlushManager;
-	protected GpuBufferAllocator!: GpuBufferAllocator;
-	protected SerializationManager!: SerializationManager;
+	public FlushManager!: FlushManager;
+	public GpuBufferAllocator!: GpuBufferAllocator;
+	public SerializationManager!: SerializationManager;
 	public SortManager!: SortManager;
 	public StoreManager!: StoreManager;
 	/**

@@ -165,5 +165,5 @@ Bug reports, feature suggestions, and pull requests are welcome at any time.
 
 ## License
 
-**[Apache-2.0 license](LICENSE)**  
+**[GNU General Public License (GPLv2)](LICENSE)**  
 For details, refer to the `LICENSE` file.

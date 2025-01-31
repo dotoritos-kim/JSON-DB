@@ -87,26 +87,6 @@
 		"./VramDataBase": {
 			"import": "./dist/VramDataBase.js",
 			"require": "./dist/VramDataBase.cjs.js"
-		},
-		"./Manager/FlushManager": {
-			"import": "./dist/Manager/FlushManager.js",
-			"require": "./dist/Manager/FlushManager.cjs.js"
-		},
-		"./Manager/SerializationManager": {
-			"import": "./dist/Manager/SerializationManager.js",
-			"require": "./dist/Manager/SerializationManager.cjs.js"
-		},
-		"./Manager/StoreManager": {
-			"import": "./dist/Manager/StoreManager.js",
-			"require": "./dist/Manager/StoreManager.cjs.js"
-		},
-		"./Manager/GpuBufferAllocator": {
-			"import": "./dist/Manager/GpuBufferAllocator.js",
-			"require": "./dist/Manager/GpuBufferAllocator.cjs.js"
-		},
-		"./Manager/SortManager": {
-			"import": "./dist/Manager/SortManager.js",
-			"require": "./dist/Manager/SortManager.cjs.js"
 		}
 	},
 	"files": [

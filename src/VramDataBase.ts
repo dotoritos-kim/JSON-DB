@@ -44,6 +44,7 @@ export class VramDataBase {
 	constructor(public device: GPUDevice) {
 		this.storeMetadataMap = new Map();
 		this.storeKeyMap = new Map();
+
 		this.StoreManager = new StoreManager(this.device);
 		this.SortManager = new SortManager(this.device);
 		this.SerializationManager = new SerializationManager(this.device);

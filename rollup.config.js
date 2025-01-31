@@ -20,7 +20,6 @@ export default [
 			resolve(),
 			commonjs(),
 			typescript(),
-			dynamicImport(),
 			/*terser({
 				compress: { drop_console: true, drop_debugger: true },
 				output: { comments: false },
@@ -43,7 +42,6 @@ export default [
 			resolve(),
 			commonjs(),
 			typescript(),
-			dynamicImport(),
 			/*terser({
 				compress: { drop_console: true, drop_debugger: true },
 				output: { comments: false },

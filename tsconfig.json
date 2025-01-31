@@ -1,8 +1,8 @@
 {
 	"compilerOptions": {
-		"target": "ES2019",
+		"target": "ESNext",
 		"module": "ESNext",
-		"lib": ["DOM", "ES2019"],
+		"lib": ["DOM", "ESNext"],
 		"jsx": "react",
 		"strict": true,
 		"esModuleInterop": true,
@@ -13,8 +13,9 @@
 		"declarationMap": true,
 		"sourceMap": true,
 		"rootDir": "src",
+		"isolatedModules": true,
 		"typeRoots": ["./node_modules/@webgpu/types", "./node_modules/@types"]
 	},
-	"include": ["src", "jest.setup.ts", "__tests__", "src/VramDataBase.ts"],
+	"include": ["src/**/*", "jest.setup.ts", "__tests__"],
 	"exclude": ["src/**/*.test.ts"]
 }

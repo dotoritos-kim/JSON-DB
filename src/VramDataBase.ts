@@ -47,21 +47,30 @@ export class VramDataBase {
 	}
 
 	async initializeManager() {
-		const { FlushManager } = await import("./Manager/FlushManager");
-		const { GpuBufferAllocator } = await import(
-			"./Manager/GpuBufferAllocator"
-		);
-		const { SerializationManager } = await import(
-			"./Manager/SerializationManager"
-		);
-		const { StoreManager } = await import("./Manager/StoreManager");
-		const { SortManager } = await import("./Manager/SortManager");
+		try {
+			const [
+				{ FlushManager },
+				{ GpuBufferAllocator },
+				{ SerializationManager },
+				{ StoreManager },
+				{ SortManager },
+			] = await Promise.all([
+				import("./Manager/FlushManager"),
+				import("./Manager/GpuBufferAllocator"),
+				import("./Manager/SerializationManager"),
+				import("./Manager/StoreManager"),
+				import("./Manager/SortManager"),
+			]);
 
-		this.StoreManager = new StoreManager(this.device);
-		this.SortManager = new SortManager(this.device);
-		this.SerializationManager = new SerializationManager(this.device);
-		this.FlushManager = new FlushManager(this.device);
-		this.GpuBufferAllocator = new GpuBufferAllocator(this.device);
+			this.StoreManager = new StoreManager(this.device);
+			this.SortManager = new SortManager(this.device);
+			this.SerializationManager = new SerializationManager(this.device);
+			this.FlushManager = new FlushManager(this.device);
+			this.GpuBufferAllocator = new GpuBufferAllocator(this.device);
+		} catch (error) {
+			console.error("Manager 초기화 중 에러 발생:", error);
+			// 필요한 경우 추가적인 에러 처리 로직을 여기에 작성
+		}
 	}
 
 	/**

@@ -47,24 +47,37 @@ export class VramDataBase {
 	}
 
 	async initializeManager() {
-		const { FlushManager } = await import("./Manager/FlushManager");
+		const [
+			{ FlushManager },
+			{ GpuBufferAllocator },
+			{ SerializationManager },
+			{ SortManager },
+			{ StoreManager },
+		] = await Promise.all([
+			import("./Manager/FlushManager"),
+			import("./Manager/GpuBufferAllocator"),
+			import("./Manager/SerializationManager"),
+			import("./Manager/SortManager"),
+			import("./Manager/StoreManager"),
+		]);
+
+		if (
+			!FlushManager ||
+			!GpuBufferAllocator ||
+			!SerializationManager ||
+			!SortManager ||
+			!StoreManager
+		) {
+			throw new Error("모든 모듈이 정상적으로 로드되지 않았습니다.");
+		}
+
 		this.FlushManager = new FlushManager(this.device);
-
-		const { GpuBufferAllocator } = await import(
-			"./Manager/GpuBufferAllocator"
-		);
 		this.GpuBufferAllocator = new GpuBufferAllocator(this.device);
-
-		const { SerializationManager } = await import(
-			"./Manager/SerializationManager"
-		);
 		this.SerializationManager = new SerializationManager(this.device);
-
-		const { SortManager } = await import("./Manager/SortManager");
 		this.SortManager = new SortManager(this.device);
-
-		const { StoreManager } = await import("./Manager/StoreManager");
 		this.StoreManager = new StoreManager(this.device);
+
+		console.log("모든 Manager 초기화 완료");
 	}
 
 	/**

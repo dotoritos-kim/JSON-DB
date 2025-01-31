@@ -79,6 +79,18 @@
 		".": {
 			"import": "./dist/index.js",
 			"require": "./dist/index.cjs.js"
+		},
+		"./Manager/FlushManager": {
+			"import": "./dist/Manager/FlushManager.js",
+			"require": "./dist/Manager/FlushManager.cjs.js"
+		},
+		"./Manager/SerializationManager": {
+			"import": "./dist/Manager/SerializationManager.js",
+			"require": "./dist/Manager/SerializationManager.cjs.js"
+		},
+		"./Manager/StoreManager": {
+			"import": "./dist/Manager/StoreManager.js",
+			"require": "./dist/Manager/StoreManager.cjs.js"
 		}
 	},
 	"files": [

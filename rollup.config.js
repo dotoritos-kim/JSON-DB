@@ -28,10 +28,11 @@ export default [
 				reservedStrings: [/import\(/], // 'import(' 패턴을 포함한 문자열 보호
 				// 기타 필요한 옵션 추가
 			}),
-			terser({
+			/*terser({
 				compress: { drop_console: true, drop_debugger: true },
 				output: { comments: false },
-			}),
+			})*/
+			,
 		],
 		external: ["react", "core-js", "react-dom"],
 	}, // CJS 번들
@@ -57,10 +58,11 @@ export default [
 				reservedStrings: [/import\(/], // 'import(' 패턴을 포함한 문자열 보호
 				// 기타 필요한 옵션 추가
 			}),
-			terser({
+			/*terser({
 				compress: { drop_console: true, drop_debugger: true },
 				output: { comments: false },
-			}),
+			})*/
+			,
 		],
 		external: ["react", "core-js", "react-dom"],
 	},

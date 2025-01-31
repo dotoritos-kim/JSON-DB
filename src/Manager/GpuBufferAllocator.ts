@@ -2,9 +2,11 @@ import { BufferMetadata, StoreMetadata } from "../types/StoreMetadata";
 import { roundUp } from "../utils";
 import { VramDataBase } from "../VramDataBase";
 
-export class GpuBufferAllocator extends VramDataBase {
-	constructor(device: GPUDevice) {
-		super(device);
+export class GpuBufferAllocator {
+	private parent: VramDataBase;
+
+	constructor(device: GPUDevice, parent: VramDataBase) {
+		this.parent = parent;
 	}
 	/**
 	 * 새 GPU 버퍼를 생성하여 반환한다.
@@ -15,7 +17,7 @@ export class GpuBufferAllocator extends VramDataBase {
 	 * @returns {GPUBuffer} 새로 생성된 GPU 버퍼
 	 */
 	createNewBuffer(storeMeta: StoreMetadata, size: number): GPUBuffer {
-		return this.device.createBuffer({
+		return this.parent.device.createBuffer({
 			size: storeMeta.bufferSize,
 			usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: false,
@@ -86,7 +88,7 @@ export class GpuBufferAllocator extends VramDataBase {
 			storeMeta.bufferSize,
 			roundUp(size, 256)
 		);
-		const gpuBuffer = this.device.createBuffer({
+		const gpuBuffer = this.parent.device.createBuffer({
 			size: neededCapacity,
 			usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: false,
@@ -196,7 +198,7 @@ export class GpuBufferAllocator extends VramDataBase {
 			storeMeta.bufferSize,
 			roundUp(size, 256)
 		);
-		const newGpuBuffer = this.device.createBuffer({
+		const newGpuBuffer = this.parent.device.createBuffer({
 			size: neededCapacity,
 			usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: false,
@@ -282,8 +284,8 @@ fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
 }
 `;
 
-		const module = this.device.createShaderModule({ code });
-		const pipeline = this.device.createComputePipeline({
+		const module = this.parent.device.createShaderModule({ code });
+		const pipeline = this.parent.device.createComputePipeline({
 			layout: "auto",
 			compute: { module, entryPoint: "main" },
 		});
@@ -296,7 +298,7 @@ fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
 	 * @returns {GPUBuffer} u32 5개를 저장할 버퍼
 	 */
 	createParamBuffer(): GPUBuffer {
-		return this.device.createBuffer({
+		return this.parent.device.createBuffer({
 			size: 5 * 4,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		});
@@ -309,7 +311,7 @@ fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
 	 * @returns {GPUBuffer} 원자적 연산이 가능한 버퍼
 	 */
 	createDebugAtomicBuffer(): GPUBuffer {
-		const buffer = this.device.createBuffer({
+		const buffer = this.parent.device.createBuffer({
 			size: 4,
 			usage:
 				GPUBufferUsage.STORAGE |
@@ -329,7 +331,7 @@ fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
 	 * @returns {GPUBuffer} 0 값만 있는 작은 버퍼
 	 */
 	createZeroBuffer(): GPUBuffer {
-		const zeroBuffer = this.device.createBuffer({
+		const zeroBuffer = this.parent.device.createBuffer({
 			size: 4,
 			usage: GPUBufferUsage.COPY_SRC,
 			mappedAtCreation: true,
@@ -369,9 +371,9 @@ fn main(@builtin(global_invocation_id) gid : vec3<u32>) {
 		debugAtomicBuffer: GPUBuffer,
 		zeroBuffer: GPUBuffer
 	): Promise<void> {
-		const cmd = this.device.createCommandEncoder();
+		const cmd = this.parent.device.createCommandEncoder();
 		cmd.copyBufferToBuffer(zeroBuffer, 0, debugAtomicBuffer, 0, 4);
-		this.device.queue.submit([cmd.finish()]);
-		await this.device.queue.onSubmittedWorkDone();
+		this.parent.device.queue.submit([cmd.finish()]);
+		await this.parent.device.queue.onSubmittedWorkDone();
 	}
 }

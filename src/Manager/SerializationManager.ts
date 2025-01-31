@@ -8,9 +8,11 @@ import {
 import { padJsonTo4Bytes, padTo4Bytes, ROW_INACTIVE_FLAG } from "../utils";
 import { VramDataBase } from "../VramDataBase";
 
-export class SerializationManager extends VramDataBase {
-	constructor(device: GPUDevice) {
-		super(device);
+export class SerializationManager {
+	private parent: VramDataBase;
+
+	constructor(device: GPUDevice, parent: VramDataBase) {
+		this.parent = parent;
 	}
 	/**
 	 * 값(JSON, TypedArray, ArrayBuffer 등)을 GPU 버퍼에 기록하기 적합한 ArrayBuffer로 직렬화한다.
@@ -164,12 +166,12 @@ export class SerializationManager extends VramDataBase {
 			ms = rawValue.getTime();
 		} else {
 			const str = String(rawValue);
-			const cached = this.dateParseCache.get(str);
+			const cached = this.parent.dateParseCache.get(str);
 			if (cached !== undefined) {
 				ms = cached;
 			} else {
 				ms = Date.parse(str);
-				this.dateParseCache.set(str, ms);
+				this.parent.dateParseCache.set(str, ms);
 			}
 		}
 
@@ -213,10 +215,10 @@ export class SerializationManager extends VramDataBase {
 		}
 
 		// 그 외엔 64비트 float(hi, lo) 2워드
-		this.float64View.setFloat64(0, rawValue, true); // little-endian
+		this.parent.float64View.setFloat64(0, rawValue, true); // little-endian
 
-		let lo = this.float64View.getUint32(0, true);
-		let hi = this.float64View.getUint32(4, true);
+		let lo = this.parent.float64View.getUint32(0, true);
+		let hi = this.parent.float64View.getUint32(4, true);
 
 		if (invert) {
 			lo = 0xffffffff - lo;
@@ -241,7 +243,7 @@ export class SerializationManager extends VramDataBase {
 		const key = invert ? `1:${rawValue}` : `0:${rawValue}`;
 
 		// 캐시 체크
-		const cached = this.stringCache.get(key);
+		const cached = this.parent.stringCache.get(key);
 		if (cached) {
 			return cached;
 		}
@@ -254,7 +256,7 @@ export class SerializationManager extends VramDataBase {
 		}
 
 		// 캐시에 저장
-		this.stringCache.set(key, codePoints);
+		this.parent.stringCache.set(key, codePoints);
 
 		return codePoints;
 	}
@@ -296,7 +298,7 @@ export class SerializationManager extends VramDataBase {
 
 		// GPU 버퍼에서 공간 할당(오프셋, 버퍼인덱스 결정)
 		const { gpuBuffer, bufferIndex, offset } =
-			this.GpuBufferAllocator.findOrCreateSpace(
+			this.parent.GpuBufferAllocator.findOrCreateSpace(
 				storeMeta,
 				arrayBuffer.byteLength
 			);
@@ -358,7 +360,7 @@ export class SerializationManager extends VramDataBase {
 
 			// 더 큰 데이터에 맞는 새 공간 확보
 			const { gpuBuffer, bufferIndex, offset } =
-				this.GpuBufferAllocator.findOrCreateSpace(
+				this.parent.GpuBufferAllocator.findOrCreateSpace(
 					storeMeta,
 					arrayBuffer.byteLength
 				);
@@ -396,12 +398,17 @@ export class SerializationManager extends VramDataBase {
 		};
 
 		const flushStart = performance.now();
-		await this.FlushManager.flushWrites();
+		await this.parent.FlushManager.flushWrites();
 		performanceMetrics.flushWrites = performance.now() - flushStart;
 
 		const metadataStart = performance.now();
-		const storeMeta = this.getStoreMetadata(storeName) as StoreMetadata;
-		const keyMap = this.StoreManager.getKeyMap(storeName) as Map<string, T>;
+		const storeMeta = this.parent.getStoreMetadata(
+			storeName
+		) as StoreMetadata;
+		const keyMap = this.parent.StoreManager.getKeyMap(storeName) as Map<
+			string,
+			T
+		>;
 		performanceMetrics.metadataRetrieval =
 			performance.now() - metadataStart;
 

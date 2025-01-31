@@ -22,15 +22,15 @@ export class VramDataBase {
 	public storeMetadataMap: Map<string, StoreMetadata>;
 	public storeKeyMap: Map<string, Map<string, number>>;
 	public pendingWrites: PendingWrite[] = [];
-	protected readonly BATCH_SIZE = 10000;
-	protected flushTimer: number | null = null;
+	public readonly BATCH_SIZE = 10000;
+	public flushTimer: number | null = null;
 	public isReady: boolean | null = true;
-	protected waitUntilReadyPromise: Promise<void> | null = null;
-	protected readyResolver: (() => void) | null = null;
-	protected float64Buffer = new ArrayBuffer(8);
-	protected float64View = new DataView(this.float64Buffer);
-	protected dateParseCache = new Map<string, number>();
-	protected stringCache = new Map<string, Uint32Array>();
+	public waitUntilReadyPromise: Promise<void> | null = null;
+	public readyResolver: (() => void) | null = null;
+	public float64Buffer = new ArrayBuffer(8);
+	public float64View = new DataView(this.float64Buffer);
+	public dateParseCache = new Map<string, number>();
+	public stringCache = new Map<string, Uint32Array>();
 
 	public FlushManager: FlushManager;
 	public GpuBufferAllocator: GpuBufferAllocator;
@@ -45,11 +45,11 @@ export class VramDataBase {
 		this.storeMetadataMap = new Map();
 		this.storeKeyMap = new Map();
 
-		this.StoreManager = new StoreManager(this.device);
-		this.SortManager = new SortManager(this.device);
-		this.SerializationManager = new SerializationManager(this.device);
-		this.FlushManager = new FlushManager(this.device);
-		this.GpuBufferAllocator = new GpuBufferAllocator(this.device);
+		this.StoreManager = new StoreManager(this.device, this);
+		this.SortManager = new SortManager(this.device, this);
+		this.SerializationManager = new SerializationManager(this.device, this);
+		this.FlushManager = new FlushManager(this.device, this);
+		this.GpuBufferAllocator = new GpuBufferAllocator(this.device, this);
 	}
 
 	/**
@@ -332,7 +332,7 @@ export class VramDataBase {
 	 * @returns {StoreMetadata} 해당 스토어의 메타데이터
 	 * @throws {Error} 스토어가 없으면 에러
 	 */
-	protected getStoreMetadata(storeName: string): StoreMetadata {
+	getStoreMetadata(storeName: string): StoreMetadata {
 		const meta = this.storeMetadataMap.get(storeName);
 		if (!meta) {
 			throw new Error(`Object store "${storeName}" does not exist.`);
@@ -347,7 +347,7 @@ export class VramDataBase {
 	 * @param {string[]} keys - 가져올 키 배열
 	 * @returns {Promise<{ results: (T | null)[]; perKeyMetrics: any }>}
 	 */
-	protected async getMultipleByKeys<T>(
+	async getMultipleByKeys<T>(
 		storeName: string,
 		keys: string[]
 	): Promise<{ results: (T | null)[]; perKeyMetrics: any }> {
@@ -397,7 +397,7 @@ export class VramDataBase {
 	 * @protected
 	 * @returns {Promise<void>} VramDataBase가 ready 상태가 되면 resolve
 	 */
-	protected waitUntilReady(): Promise<void> {
+	waitUntilReady(): Promise<void> {
 		// 이미 준비됨
 		if (this.isReady) return Promise.resolve();
 
@@ -423,7 +423,7 @@ export class VramDataBase {
 	 * @returns {Promise<{ results: (any | null)[]; perKeyMetrics: any }>}
 	 *    `results` 배열을 포함하는 객체를 resolve
 	 */
-	protected async readRowsWithPagination<T>(
+	async readRowsWithPagination<T>(
 		storeName: string,
 		allKeys: any,
 		skip: number,

@@ -1,9 +1,11 @@
 import { PendingWrite } from "../types/StoreMetadata";
 import { VramDataBase } from "../VramDataBase";
 
-export class FlushManager extends VramDataBase {
-	constructor(device: GPUDevice) {
-		super(device);
+export class FlushManager {
+	private parent: VramDataBase;
+
+	constructor(device: GPUDevice, parent: VramDataBase) {
+		this.parent = parent;
 	}
 	/**
 	 * 대기 중인 쓰기가 임계치에 도달했거나, 다른 조건으로 인해 flush가 필요하면 flush를 수행한다.
@@ -12,10 +14,10 @@ export class FlushManager extends VramDataBase {
 	 * @returns {Promise<void>} 만약 flush가 트리거되면 완료될 때 resolve
 	 */
 	async checkAndFlush(): Promise<void> {
-		if (this.pendingWrites.length >= this.BATCH_SIZE) {
-			if (this.flushTimer !== null) {
-				clearTimeout(this.flushTimer);
-				this.flushTimer = null;
+		if (this.parent.pendingWrites.length >= this.parent.BATCH_SIZE) {
+			if (this.parent.flushTimer !== null) {
+				clearTimeout(this.parent.flushTimer);
+				this.parent.flushTimer = null;
 			}
 			// 여기서 flush 완료를 대기
 			await this.flushWrites();
@@ -30,13 +32,13 @@ export class FlushManager extends VramDataBase {
 	 * @returns {Promise<void>} 모든 쓰기가 제출되고 큐가 완료되면 resolve
 	 */
 	async flushWrites(): Promise<void> {
-		if (this.pendingWrites.length === 0) {
+		if (this.parent.pendingWrites.length === 0) {
 			return;
 		}
 
 		// pendingWrites를 GPUBuffer 기준으로 그룹화한다
 		const writesByBuffer: Map<GPUBuffer, PendingWrite[]> = new Map();
-		for (const item of this.pendingWrites) {
+		for (const item of this.parent.pendingWrites) {
 			const { gpuBuffer } = item;
 			if (!writesByBuffer.has(gpuBuffer)) {
 				writesByBuffer.set(gpuBuffer, []);
@@ -56,7 +58,7 @@ export class FlushManager extends VramDataBase {
 			for (const pendingWrite of writeGroup) {
 				try {
 					const { rowMetadata, arrayBuffer } = pendingWrite;
-					this.device.queue.writeBuffer(
+					this.parent.device.queue.writeBuffer(
 						gpuBuffer,
 						rowMetadata.offset,
 						arrayBuffer
@@ -72,10 +74,10 @@ export class FlushManager extends VramDataBase {
 		}
 
 		// GPU 큐 작업 완료 대기
-		await this.device.queue.onSubmittedWorkDone();
+		await this.parent.device.queue.onSubmittedWorkDone();
 
 		// 성공적으로 기록된 항목은 pendingWrites에서 제거
-		this.pendingWrites = this.pendingWrites.filter(
+		this.parent.pendingWrites = this.parent.pendingWrites.filter(
 			(write) => !successfulWrites.has(write)
 		);
 	}
@@ -92,27 +94,27 @@ export class FlushManager extends VramDataBase {
 	 * @returns {void}
 	 */
 	public resetFlushTimer(): void {
-		if (this.flushTimer !== null) {
-			clearTimeout(this.flushTimer);
+		if (this.parent.flushTimer !== null) {
+			clearTimeout(this.parent.flushTimer);
 		}
-		this.flushTimer = window.setTimeout(async () => {
+		this.parent.flushTimer = window.setTimeout(async () => {
 			try {
 				await this.flushWrites();
-				await this.SortManager.rebuildAllDirtySorts();
-				this.dateParseCache = new Map<string, number>();
-				this.stringCache = new Map<string, Uint32Array>();
+				await this.parent.SortManager.rebuildAllDirtySorts();
+				this.parent.dateParseCache = new Map<string, number>();
+				this.parent.stringCache = new Map<string, Uint32Array>();
 			} catch (error) {
 				console.error("Error during timed flush operation:", error);
 			} finally {
-				this.flushTimer = null;
+				this.parent.flushTimer = null;
 
-				if (this.readyResolver) {
-					this.readyResolver();
-					this.readyResolver = null;
-					this.waitUntilReadyPromise = null;
+				if (this.parent.readyResolver) {
+					this.parent.readyResolver();
+					this.parent.readyResolver = null;
+					this.parent.waitUntilReadyPromise = null;
 				}
 
-				this.isReady = true;
+				this.parent.isReady = true;
 			}
 		}, 250);
 	}

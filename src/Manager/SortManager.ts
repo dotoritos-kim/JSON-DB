@@ -1,9 +1,11 @@
 import { SortDefinition, StoreMetadata } from "../types/StoreMetadata";
 import { VramDataBase } from "../VramDataBase";
 
-export class SortManager extends VramDataBase {
-	constructor(device: GPUDevice) {
-		super(device);
+export class SortManager {
+	private parent: VramDataBase;
+
+	constructor(device: GPUDevice, parent: VramDataBase) {
+		this.parent = parent;
 	}
 	/**
 	 * 사용자 정의 문자열 키 범위(lower/upper, inclusivity 등)를 적용해 배열의 키를 필터링한다.
@@ -61,7 +63,10 @@ export class SortManager extends VramDataBase {
 	 * @returns {Promise<void>} 모든 정렬 재빌드가 끝나면 resolve
 	 */
 	async rebuildAllDirtySorts(gpuSort?: boolean): Promise<void> {
-		for (const [storeName, storeMeta] of this.storeMetadataMap.entries()) {
+		for (const [
+			storeName,
+			storeMeta,
+		] of this.parent.storeMetadataMap.entries()) {
 			if (!storeMeta.sortsDirty) {
 				continue;
 			}
@@ -98,7 +103,8 @@ export class SortManager extends VramDataBase {
 		sortDef: SortDefinition
 	): Promise<void> {
 		const offsetsStoreName = `${storeMeta.storeName}-offsets`;
-		const offsetsStoreMeta = this.storeMetadataMap.get(offsetsStoreName);
+		const offsetsStoreMeta =
+			this.parent.storeMetadataMap.get(offsetsStoreName);
 		if (!offsetsStoreMeta) {
 			return;
 		}
@@ -117,7 +123,8 @@ export class SortManager extends VramDataBase {
 
 		// 디바이스 한도 체크
 		const maxBinding =
-			this.device.limits.maxStorageBufferBindingSize || 128 * 1024 * 1024;
+			this.parent.device.limits.maxStorageBufferBindingSize ||
+			128 * 1024 * 1024;
 		if (totalBytes > maxBinding) {
 			console.error(
 				`Sort data requires ${totalBytes} bytes, ` +
@@ -127,7 +134,7 @@ export class SortManager extends VramDataBase {
 		}
 
 		// CPU → GPU 업로드용 스테이징 버퍼
-		const stagingBuffer = this.device.createBuffer({
+		const stagingBuffer = this.parent.device.createBuffer({
 			size: totalBytes,
 			usage: GPUBufferUsage.MAP_WRITE | GPUBufferUsage.COPY_SRC,
 			mappedAtCreation: true,
@@ -137,7 +144,7 @@ export class SortManager extends VramDataBase {
 		stagingBuffer.unmap();
 
 		// STORAGE 용 버퍼
-		const sortItemsBuffer = this.device.createBuffer({
+		const sortItemsBuffer = this.parent.device.createBuffer({
 			size: totalBytes,
 			usage:
 				GPUBufferUsage.STORAGE |
@@ -147,7 +154,7 @@ export class SortManager extends VramDataBase {
 
 		// 스테이징 → STORAGE
 		{
-			const encoder = this.device.createCommandEncoder();
+			const encoder = this.parent.device.createCommandEncoder();
 			encoder.copyBufferToBuffer(
 				stagingBuffer,
 				0,
@@ -155,24 +162,24 @@ export class SortManager extends VramDataBase {
 				0,
 				totalBytes
 			);
-			this.device.queue.submit([encoder.finish()]);
+			this.parent.device.queue.submit([encoder.finish()]);
 		}
 		stagingBuffer.destroy();
 
 		// 파이프라인 및 보조 버퍼들 생성
 		const { pipeline } =
-			this.GpuBufferAllocator.createBitonicSortPipelineForJson();
-		const paramBuffer = this.GpuBufferAllocator.createParamBuffer();
+			this.parent.GpuBufferAllocator.createBitonicSortPipelineForJson();
+		const paramBuffer = this.parent.GpuBufferAllocator.createParamBuffer();
 		const debugAtomicBuffer =
-			this.GpuBufferAllocator.createDebugAtomicBuffer();
-		const zeroBuffer = this.GpuBufferAllocator.createZeroBuffer();
+			this.parent.GpuBufferAllocator.createDebugAtomicBuffer();
+		const zeroBuffer = this.parent.GpuBufferAllocator.createZeroBuffer();
 
 		// 비토닉 패턴
 		const paddedCount = 1 << Math.ceil(Math.log2(rowCount));
 		const itemFieldCount = this.computeFieldCountForDefinition(sortDef);
 
 		// 바인드 그룹 생성
-		const bindGroup = this.device.createBindGroup({
+		const bindGroup = this.parent.device.createBindGroup({
 			layout: pipeline.getBindGroupLayout(0),
 			entries: [
 				{ binding: 0, resource: { buffer: sortItemsBuffer } },
@@ -219,7 +226,7 @@ export class SortManager extends VramDataBase {
 	 * @returns {GPUBuffer} u32 5개를 저장할 버퍼
 	 */
 	createParamBuffer(): GPUBuffer {
-		return this.device.createBuffer({
+		return this.parent.device.createBuffer({
 			size: 5 * 4,
 			usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 		});
@@ -249,7 +256,9 @@ export class SortManager extends VramDataBase {
 		offsetsStoreMeta: StoreMetadata,
 		sortDef: SortDefinition
 	): Promise<{ sortItems: Uint32Array; rowCount: number }> {
-		const offsetsKeyMap = this.storeKeyMap.get(offsetsStoreMeta.storeName)!;
+		const offsetsKeyMap = this.parent.storeKeyMap.get(
+			offsetsStoreMeta.storeName
+		)!;
 		const allKeys = Array.from(offsetsKeyMap.keys());
 		const matchedKeys = allKeys.filter((k) =>
 			k.endsWith(`::${sortDef.name}`)
@@ -260,11 +269,11 @@ export class SortManager extends VramDataBase {
 		}
 
 		// 관련 offsets 행 전부 가져오기
-		const { results } = await this.getMultipleByKeys(
+		const { results } = await this.parent.getMultipleByKeys(
 			offsetsStoreMeta.storeName,
 			matchedKeys
 		);
-		const mainKeyMap = this.storeKeyMap.get(storeMeta.storeName)!;
+		const mainKeyMap = this.parent.storeKeyMap.get(storeMeta.storeName)!;
 
 		// 전체 워드 수 계산. 행당 (1 + offsetData.length)
 		let totalWords = 0;
@@ -318,18 +327,18 @@ export class SortManager extends VramDataBase {
 		const totalBytes = totalWords * 4;
 
 		// 스테이징 버퍼 생성
-		const staging = this.device.createBuffer({
+		const staging = this.parent.device.createBuffer({
 			size: totalBytes,
 			usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
 		});
 
 		// itemsBuffer → staging 복사
 		{
-			const cmd = this.device.createCommandEncoder();
+			const cmd = this.parent.device.createCommandEncoder();
 			console.log("copyBufferToBuffer4");
 			cmd.copyBufferToBuffer(itemsBuffer, 0, staging, 0, totalBytes);
-			this.device.queue.submit([cmd.finish()]);
-			await this.device.queue.onSubmittedWorkDone();
+			this.parent.device.queue.submit([cmd.finish()]);
+			await this.parent.device.queue.onSubmittedWorkDone();
 		}
 
 		// 스테이징 매핑
@@ -359,7 +368,7 @@ export class SortManager extends VramDataBase {
 		fieldsPerItem: number
 	) {
 		// 1) debug atomic을 0으로 리셋
-		await this.GpuBufferAllocator.resetDebugAtomicBuffer(
+		await this.parent.GpuBufferAllocator.resetDebugAtomicBuffer(
 			debugAtomicBuffer,
 			zeroBuffer
 		);
@@ -372,10 +381,10 @@ export class SortManager extends VramDataBase {
 			paddedCount,
 			fieldsPerItem,
 		]);
-		this.device.queue.writeBuffer(paramBuffer, 0, paramData);
+		this.parent.device.queue.writeBuffer(paramBuffer, 0, paramData);
 
 		// 3) 디스패치
-		const commandEncoder = this.device.createCommandEncoder();
+		const commandEncoder = this.parent.device.createCommandEncoder();
 		const pass = commandEncoder.beginComputePass();
 		pass.setPipeline(pipeline);
 		pass.setBindGroup(0, bindGroup);
@@ -384,7 +393,7 @@ export class SortManager extends VramDataBase {
 		pass.dispatchWorkgroups(workgroups);
 		pass.end();
 
-		this.device.queue.submit([commandEncoder.finish()]);
-		await this.device.queue.onSubmittedWorkDone();
+		this.parent.device.queue.submit([commandEncoder.finish()]);
+		await this.parent.device.queue.onSubmittedWorkDone();
 	}
 }

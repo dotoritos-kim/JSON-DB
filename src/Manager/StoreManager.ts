@@ -7,9 +7,11 @@ import {
 import { compareKeys, likeToRegex, ROW_INACTIVE_FLAG } from "../utils";
 import { VramDataBase } from "../VramDataBase";
 
-export class StoreManager extends VramDataBase {
-	constructor(device: GPUDevice) {
-		super(device);
+export class StoreManager {
+	private parent: VramDataBase;
+
+	constructor(device: GPUDevice, parent: VramDataBase) {
+		this.parent = parent;
 	}
 	/**
 	 * 지정된 구성 옵션을 사용하여 새 오브젝트 스토어를 생성한다.
@@ -44,7 +46,7 @@ export class StoreManager extends VramDataBase {
 
 	public createObjectStore(storeName: string, options: IDBOptions): void {
 		// 1) 같은 이름의 스토어가 이미 존재하는지 확인. 존재하면 에러 발생.
-		if (this.storeMetadataMap.has(storeName)) {
+		if (this.parent.storeMetadataMap.has(storeName)) {
 			throw new Error(`Object store "${storeName}" already exists.`);
 		}
 
@@ -86,9 +88,9 @@ export class StoreManager extends VramDataBase {
 		};
 
 		// 5) 새 스토어 메타데이터를 storeMetadataMap에 저장한다.
-		this.storeMetadataMap.set(storeName, storeMetadata);
+		this.parent.storeMetadataMap.set(storeName, storeMetadata);
 		// 5a) storeKeyMap에도 비어 있는 keyMap을 등록한다.
-		this.storeKeyMap.set(storeName, new Map());
+		this.parent.storeKeyMap.set(storeName, new Map());
 
 		// 6) JSON 타입 스토어면서 하나 이상의 sortDefinition이 있다면, "offsets" 스토어도 생성한다.
 		if (
@@ -118,11 +120,11 @@ export class StoreManager extends VramDataBase {
 	 * @returns {void} 반환값 없음
 	 */
 	public deleteObjectStore(storeName: string): void {
-		if (!this.storeMetadataMap.has(storeName)) {
+		if (!this.parent.storeMetadataMap.has(storeName)) {
 			return;
 		}
-		this.storeMetadataMap.delete(storeName);
-		this.storeKeyMap.delete(storeName);
+		this.parent.storeMetadataMap.delete(storeName);
+		this.parent.storeKeyMap.delete(storeName);
 	}
 
 	/**
@@ -130,7 +132,7 @@ export class StoreManager extends VramDataBase {
 	 * @returns {string[]} 모든 스토어 이름이 들어 있는 배열
 	 */
 	public listObjectStores(): string[] {
-		return Array.from(this.storeMetadataMap.keys());
+		return Array.from(this.parent.storeMetadataMap.keys());
 	}
 
 	/**
@@ -152,9 +154,9 @@ export class StoreManager extends VramDataBase {
 		key: string,
 		value: any
 	): Promise<void> {
-		this.isReady = false;
+		this.parent.isReady = false;
 
-		const storeMeta = this.storeMetadataMap.get(storeName);
+		const storeMeta = this.parent.storeMetadataMap.get(storeName);
 		if (!storeMeta) {
 			throw new Error(`Object store "${storeName}" does not exist.`);
 		}
@@ -174,8 +176,8 @@ export class StoreManager extends VramDataBase {
 		}
 
 		// 3) flush 타이머 리셋 및 플러시 수행 가능성 확인
-		this.FlushManager.resetFlushTimer();
-		await this.FlushManager.checkAndFlush();
+		this.parent.FlushManager.resetFlushTimer();
+		await this.parent.FlushManager.checkAndFlush();
 	}
 
 	/**
@@ -197,9 +199,9 @@ export class StoreManager extends VramDataBase {
 		key: string,
 		value: any
 	): Promise<void> {
-		this.isReady = false;
+		this.parent.isReady = false;
 
-		const storeMeta = this.storeMetadataMap.get(storeName);
+		const storeMeta = this.parent.storeMetadataMap.get(storeName);
 		if (!storeMeta) {
 			throw new Error(`Object store "${storeName}" does not exist.`);
 		}
@@ -219,8 +221,8 @@ export class StoreManager extends VramDataBase {
 		}
 
 		// 3) flush 타이머 리셋 및 플러시 수행 가능성 확인
-		this.FlushManager.resetFlushTimer();
-		await this.FlushManager.checkAndFlush();
+		this.parent.FlushManager.resetFlushTimer();
+		await this.parent.FlushManager.checkAndFlush();
 	}
 
 	/**
@@ -310,7 +312,7 @@ export class StoreManager extends VramDataBase {
 		if (Array.isArray(param2)) {
 			// 오버로드 1: 키 배열로 가져오기
 			const keys = param2;
-			const { results } = await this.getMultipleByKeys<T>(
+			const { results } = await this.parent.getMultipleByKeys<T>(
 				storeName,
 				keys
 			);
@@ -322,14 +324,14 @@ export class StoreManager extends VramDataBase {
 
 			// flush & 스토어 메타데이터 가져오기
 			const { keyMap } =
-				await this.SerializationManager.flushAndGetMetadata<T>(
+				await this.parent.SerializationManager.flushAndGetMetadata<T>(
 					storeName
 				);
 
 			// 스토어의 keyMap을 배열로 바꾼다
 			const allKeys = Array.from(keyMap.keys());
 
-			const { results } = await this.readRowsWithPagination<T>(
+			const { results } = await this.parent.readRowsWithPagination<T>(
 				storeName,
 				allKeys,
 				skip,
@@ -353,7 +355,7 @@ export class StoreManager extends VramDataBase {
 	 */
 	public async delete(storeName: string, key: string): Promise<void> {
 		// 스토어 메타데이터와 key 맵 가져오기
-		const storeMeta = this.getStoreMetadata(storeName);
+		const storeMeta = this.parent.getStoreMetadata(storeName);
 		const keyMap = this.getKeyMap(storeName);
 
 		// 활성화된 행 메타데이터 찾기
@@ -372,11 +374,11 @@ export class StoreManager extends VramDataBase {
 		zeroedView.fill(0); // 실제 삭제(덮어쓰기)를 위해 0으로 채움
 
 		// 삭제 작업을 pendingWrites에 추가
-		this.pendingWrites.push({
+		this.parent.pendingWrites.push({
 			storeMeta,
 			rowMetadata,
 			arrayBuffer: zeroedArrayBuffer,
-			gpuBuffer: this.GpuBufferAllocator.getBufferByIndex(
+			gpuBuffer: this.parent.GpuBufferAllocator.getBufferByIndex(
 				storeMeta,
 				rowMetadata.bufferIndex
 			),
@@ -385,10 +387,10 @@ export class StoreManager extends VramDataBase {
 		});
 
 		// flush 타이머 리셋
-		this.FlushManager.resetFlushTimer();
+		this.parent.FlushManager.resetFlushTimer();
 
 		// 배치 크기 초과 확인
-		await this.FlushManager.checkAndFlush();
+		await this.parent.FlushManager.checkAndFlush();
 	}
 
 	/**
@@ -400,12 +402,12 @@ export class StoreManager extends VramDataBase {
 	 * @throws {Error} 스토어가 존재하지 않을 경우 에러 발생
 	 */
 	public async clear(storeName: string): Promise<void> {
-		const storeMeta = this.storeMetadataMap.get(storeName);
+		const storeMeta = this.parent.storeMetadataMap.get(storeName);
 		if (!storeMeta) {
 			throw new Error(`Object store "${storeName}" does not exist.`);
 		}
 
-		await this.waitUntilReady();
+		await this.parent.waitUntilReady();
 
 		// 스토어 메타데이터와 keyMap 가져오기
 		const keyMap = this.getKeyMap(storeName);
@@ -423,7 +425,7 @@ export class StoreManager extends VramDataBase {
 		// 버퍼 목록 비우기
 		storeMeta.buffers = [];
 
-		const newGpuBuffer = this.device.createBuffer({
+		const newGpuBuffer = this.parent.device.createBuffer({
 			size: storeMeta.bufferSize,
 			usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
 			mappedAtCreation: false,
@@ -479,7 +481,7 @@ export class StoreManager extends VramDataBase {
 			direction?: "next" | "prev";
 		}
 	): AsyncGenerator<{ key: string; value: any }, void, unknown> {
-		const storeMeta = this.storeMetadataMap.get(storeName);
+		const storeMeta = this.parent.storeMetadataMap.get(storeName);
 		if (!storeMeta) {
 			throw new Error(`Object store "${storeName}" does not exist.`);
 		}
@@ -492,7 +494,7 @@ export class StoreManager extends VramDataBase {
 
 		// range가 있다면 키 범위를 필터링
 		if (options?.range) {
-			activeKeys = this.SortManager.applyCustomRange(
+			activeKeys = this.parent.SortManager.applyCustomRange(
 				activeKeys,
 				options.range
 			);
@@ -528,7 +530,7 @@ export class StoreManager extends VramDataBase {
 	 * @throws {Error} 스토어가 없으면 새 맵을 반환(혹은 에러)
 	 */
 	getKeyMap(storeName: string): Map<string, number> {
-		const keyMap = this.storeKeyMap.get(storeName);
+		const keyMap = this.parent.storeKeyMap.get(storeName);
 		if (!keyMap) {
 			return new Map<string, number>();
 		}
@@ -552,15 +554,16 @@ export class StoreManager extends VramDataBase {
 		value: any,
 		operationType: "add" | "put"
 	): Promise<void> {
-		const keyMap = this.storeKeyMap.get(storeMeta.storeName)!;
-		const arrayBuffer = this.SerializationManager.serializeValueForStore(
-			storeMeta,
-			value
-		);
+		const keyMap = this.parent.storeKeyMap.get(storeMeta.storeName)!;
+		const arrayBuffer =
+			this.parent.SerializationManager.serializeValueForStore(
+				storeMeta,
+				value
+			);
 
 		// 행 메타데이터 찾기 또는 생성
 		const rowMetadata =
-			await this.SerializationManager.findOrCreateRowMetadata(
+			await this.parent.SerializationManager.findOrCreateRowMetadata(
 				storeMeta,
 				keyMap,
 				key,
@@ -569,13 +572,13 @@ export class StoreManager extends VramDataBase {
 			);
 
 		// GPU 버퍼 가져오기
-		const gpuBuffer = this.GpuBufferAllocator.getBufferByIndex(
+		const gpuBuffer = this.parent.GpuBufferAllocator.getBufferByIndex(
 			storeMeta,
 			rowMetadata.bufferIndex
 		);
 
 		// 메인 스토어 쓰기를 대기열에 추가
-		this.pendingWrites.push({
+		this.parent.pendingWrites.push({
 			storeMeta,
 			rowMetadata,
 			arrayBuffer,
@@ -602,13 +605,14 @@ export class StoreManager extends VramDataBase {
 		operationType: "add" | "put"
 	): Promise<void> {
 		const offsetsStoreName = `${storeMeta.storeName}-offsets`;
-		const offsetsStoreMeta = this.storeMetadataMap.get(offsetsStoreName);
+		const offsetsStoreMeta =
+			this.parent.storeMetadataMap.get(offsetsStoreName);
 		if (!offsetsStoreMeta) {
 			// offsets 스토어가 없으면 할 게 없음
 			return;
 		}
 
-		const offsetsKeyMap = this.storeKeyMap.get(offsetsStoreName)!;
+		const offsetsKeyMap = this.parent.storeKeyMap.get(offsetsStoreName)!;
 
 		// 각 정렬 정의를 독립적으로 처리
 		for (const singleDefinition of storeMeta.sortDefinition!) {
@@ -628,7 +632,7 @@ export class StoreManager extends VramDataBase {
 
 			// 5) offsets 스토어에서 row 메타데이터 찾거나 생성
 			const offsetsRowMetadata =
-				await this.SerializationManager.findOrCreateRowMetadata(
+				await this.parent.SerializationManager.findOrCreateRowMetadata(
 					offsetsStoreMeta,
 					offsetsKeyMap,
 					offsetRowKey,
@@ -637,13 +641,14 @@ export class StoreManager extends VramDataBase {
 				);
 
 			// 6) 오프셋 스토어의 GPU 버퍼 가져오기
-			const offsetsGpuBuffer = this.GpuBufferAllocator.getBufferByIndex(
-				offsetsStoreMeta,
-				offsetsRowMetadata.bufferIndex
-			);
+			const offsetsGpuBuffer =
+				this.parent.GpuBufferAllocator.getBufferByIndex(
+					offsetsStoreMeta,
+					offsetsRowMetadata.bufferIndex
+				);
 
 			// 7) 오프셋 쓰기 요청을 pendingWrites에 추가
-			this.pendingWrites.push({
+			this.parent.pendingWrites.push({
 				storeMeta: offsetsStoreMeta,
 				rowMetadata: offsetsRowMetadata,
 				arrayBuffer: offsetsArrayBuffer,
@@ -718,11 +723,20 @@ export class StoreManager extends VramDataBase {
 
 		switch (dataType) {
 			case "date":
-				return this.SerializationManager.serializeDate(value, invert);
+				return this.parent.SerializationManager.serializeDate(
+					value,
+					invert
+				);
 			case "number":
-				return this.SerializationManager.serializeNumber(value, invert);
+				return this.parent.SerializationManager.serializeNumber(
+					value,
+					invert
+				);
 			case "string":
-				return this.SerializationManager.serializeString(value, invert);
+				return this.parent.SerializationManager.serializeString(
+					value,
+					invert
+				);
 			default:
 				// 알 수 없거나 null
 				const fallback = new Uint32Array(1);

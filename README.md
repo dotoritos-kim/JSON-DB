@@ -107,7 +107,6 @@ export function useJsonDB(storeName: string, options?: IDBOptions) {
 						totalRows: 1,
 					}
 				);
-				await db.initializeManager();
 
 				if (isMounted) {
 					setJsonDB(db);

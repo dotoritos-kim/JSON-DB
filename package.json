@@ -80,6 +80,14 @@
 			"import": "./dist/index.js",
 			"require": "./dist/index.cjs.js"
 		},
+		"./JsonGpuStore": {
+			"import": "./dist/JsonGpuStore.js",
+			"require": "./dist/JsonGpuStore.cjs.js"
+		},
+		"./VramDataBase": {
+			"import": "./dist/VramDataBase.js",
+			"require": "./dist/VramDataBase.cjs.js"
+		},
 		"./Manager/FlushManager": {
 			"import": "./dist/Manager/FlushManager.js",
 			"require": "./dist/Manager/FlushManager.cjs.js"
@@ -91,6 +99,14 @@
 		"./Manager/StoreManager": {
 			"import": "./dist/Manager/StoreManager.js",
 			"require": "./dist/Manager/StoreManager.cjs.js"
+		},
+		"./Manager/GpuBufferAllocator": {
+			"import": "./dist/Manager/GpuBufferAllocator.js",
+			"require": "./dist/Manager/GpuBufferAllocator.cjs.js"
+		},
+		"./Manager/SortManager": {
+			"import": "./dist/Manager/SortManager.js",
+			"require": "./dist/Manager/SortManager.cjs.js"
 		}
 	},
 	"files": [

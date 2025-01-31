@@ -214,7 +214,7 @@ export class GpuBufferAllocator extends VramDataBase {
 		};
 	}
 
-	createBitonicSortPipelineForJson(): {
+	public createBitonicSortPipelineForJson(): {
 		pipeline: GPUComputePipeline;
 	} {
 		const code = /* wgsl */ `

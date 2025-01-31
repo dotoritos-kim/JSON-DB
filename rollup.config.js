@@ -11,8 +11,8 @@ export default [
 			dir: "dist",
 			format: "esm",
 			sourcemap: true,
-			preserveModules: false,
-			entryFileNames: "index.js",
+			preserveModules: true, // ✅ 모듈 구조 유지
+			entryFileNames: "[name].js", // 파일명 유지
 		},
 		plugins: [
 			resolve(),
@@ -24,14 +24,14 @@ export default [
 			}),
 			obfuscator({
 				compact: true,
-				controlFlowFlattening: false, //  제어 흐름 난독화 제거
-				deadCodeInjection: false, //  불필요한 코드 삽입 제거
+				controlFlowFlattening: false,
+				deadCodeInjection: false,
 				stringArray: true,
 				stringArrayEncoding: ["base64"],
 				stringArrayThreshold: 0.75,
 				disableConsoleOutput: true,
-				renameGlobals: false, //  글로벌 변수 변경 비활성화
-				identifierNamesGenerator: "hexadecimal", //  "mangled" 대신 "hexadecimal" 사용
+				renameGlobals: false,
+				identifierNamesGenerator: "hexadecimal",
 			}),
 		],
 		external: ["react"],
@@ -42,8 +42,8 @@ export default [
 			dir: "dist",
 			format: "cjs",
 			sourcemap: true,
-			preserveModules: false,
-			entryFileNames: "index.cjs.js",
+			preserveModules: true, // 모듈 유지
+			entryFileNames: "[name].cjs.js",
 		},
 		plugins: [
 			resolve(),

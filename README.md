@@ -148,6 +148,376 @@ Json-VR-Cache/
 
 ---
 
+## TEST
+
+### Check for WebGPU Support in Your Browser
+
+```typescript
+const device = await getWebGpuDevice();
+
+if (!device) {
+	console.error("Failed to get GPU adapter.");
+	return;
+}
+```
+
+### Test the Store for All Data Types
+
+```typescript
+// Create an instance of VramDataBase
+const device = await getWebGpuDevice();
+const db = new VramDataBase(device);
+```
+
+```typescript
+// [Step] Create a store: jsonStore
+vramDataBase.createObjectStore("jsonStore", {
+	dataType: "JSON",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [Step] Add data (fails if the key already exists)
+const dataToAdd = { greeting: "Hello JSON Store!", time: 1738402167838 };
+await vramDataBase.add("jsonStore", "JsonKey", dataToAdd);
+
+// [Step] Retrieve data
+const retrievedAdd = await vramDataBase.get("jsonStore", "JsonKey");
+console.log("Retrieved after add:", retrievedAdd);
+
+// [Step] Update data (overwrite existing key)
+const updatedData = { updatedField: "newValue", time: 1738402173462 };
+await vramDataBase.put("jsonStore", "JsonKey", updatedData);
+
+// [Step] Use openCursor to view all key/value pairs
+for await (const record of vramDataBase.openCursor("jsonStore")) {
+	console.log(record.key, record.value);
+}
+
+// [Step] Delete a single record by key
+await vramDataBase.delete("jsonStore", "JsonKey");
+
+// [Step] Delete the store
+vramDataBase.deleteObjectStore("jsonStore");
+
+// [Step] Create a store: float32Store
+vramDataBase.createObjectStore("float32Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Float32Array",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [Step] Add data (fails if the key already exists)
+const dataToAddFloat32 = new Float32Array([
+	1.1100000143051147, 2.2200000286102295, 3.3299999237060547,
+]);
+await vramDataBase.add("float32Store", "myFloat32Key", dataToAddFloat32);
+
+// [Step] Retrieve data
+const retrievedAddFloat32 = await vramDataBase.get(
+	"float32Store",
+	"myFloat32Key"
+);
+console.log("Retrieved after add:", retrievedAddFloat32);
+
+// [Step] Update data (overwrite existing key)
+const updatedDataFloat32 = new Float32Array([9, 8, 7]);
+await vramDataBase.put("float32Store", "myFloat32Key", updatedDataFloat32);
+
+// [Step] Use openCursor to view all key/value pairs
+for await (const record of vramDataBase.openCursor("float32Store")) {
+	console.log(record.key, record.value);
+}
+
+// [Step] Delete a single record by key
+await vramDataBase.delete("float32Store", "myFloat32Key");
+
+// [Step] Delete the store
+vramDataBase.deleteObjectStore("float32Store");
+
+// [Step] Create a store: float64Store
+vramDataBase.createObjectStore("float64Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Float64Array",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [Step] Add data (fails if the key already exists)
+const dataToAddFloat64 = new Float64Array([10.01, 20.02, 30.03]);
+await vramDataBase.add("float64Store", "Float64Key", dataToAddFloat64);
+
+// [Step] Retrieve data
+const retrievedAddFloat64 = await vramDataBase.get(
+	"float64Store",
+	"Float64Key"
+);
+console.log("Retrieved after add:", retrievedAddFloat64);
+
+// [Step] Update data (overwrite existing key)
+const updatedDataFloat64 = new Float64Array([9, 8, 7]);
+await vramDataBase.put("float64Store", "Float64Key", updatedDataFloat64);
+
+// [Step] Use openCursor to view all key/value pairs
+for await (const record of vramDataBase.openCursor("float64Store")) {
+	console.log(record.key, record.value);
+}
+
+// [Step] Delete a single record by key
+await vramDataBase.delete("float64Store", "Float64Key");
+
+// [Step] Delete the store
+vramDataBase.deleteObjectStore("float64Store");
+
+// [Step] Create a store: int32Store
+vramDataBase.createObjectStore("int32Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Int32Array",
+	bufferSize: 2048000,
+	totalRows: 100,
+});
+
+// [Step] Add data (fails if the key already exists)
+const dataToAddInt32 = new Int32Array([-1, 0, 99999]);
+await vramDataBase.add("int32Store", "Int32Key", dataToAddInt32);
+
+// [Step] Retrieve data
+const retrievedAddInt32 = await vramDataBase.get("int32Store", "Int32Key");
+console.log("Retrieved after add:", retrievedAddInt32);
+
+// [Step] Update data (overwrite existing key)
+const updatedDataInt32 = new Int32Array([9, 8, 7]);
+await vramDataBase.put("int32Store", "Int32Key", updatedDataInt32);
+
+// [Step] Use openCursor to view all key/value pairs
+for await (const record of vramDataBase.openCursor("int32Store")) {
+	console.log(record.key, record.value);
+}
+
+// [Step] Delete a single record by key
+await vramDataBase.delete("int32Store", "Int32Key");
+
+// [Step] Delete the store
+vramDataBase.deleteObjectStore("int32Store");
+
+// [Step] Create a store: uint32Store
+vramDataBase.createObjectStore("uint32Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Uint32Array",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [Step] Add data (fails if the key already exists)
+const dataToAddUint32 = new Uint32Array([1, 2, 3]);
+await vramDataBase.add("uint32Store", "Uint32Key", dataToAddUint32);
+
+// [Step] Retrieve data
+const retrievedAddUint32 = await vramDataBase.get("uint32Store", "Uint32Key");
+console.log("Retrieved after add:", retrievedAddUint32);
+
+// [Step] Update data (overwrite existing key)
+const updatedDataUint32 = new Uint32Array([1, 2, 3]);
+await vramDataBase.put("uint32Store", "Uint32Key", updatedDataUint32);
+
+// [Step] Use openCursor to view all key/value pairs
+for await (const record of vramDataBase.openCursor("uint32Store")) {
+	console.log(record.key, record.value);
+}
+
+// [Step] Delete a single record by key
+await vramDataBase.delete("uint32Store", "Uint32Key");
+
+// [Step] Delete the store
+vramDataBase.deleteObjectStore("uint32Store");
+
+// [Step] Create a store: uint8Store
+vramDataBase.createObjectStore("uint8Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Uint8Array",
+	bufferSize: 2048000,
+	totalRows: 100,
+});
+
+// [Step] Add data (fails if the key already exists)
+const dataToAddUint8 = new Uint8Array([0, 255, 128, 64]);
+await vramDataBase.add("uint8Store", "Uint8Key", dataToAddUint8);
+
+// [Step] Retrieve data
+const retrievedAddUint8 = await vramDataBase.get("uint8Store", "Uint8Key");
+console.log("Retrieved after add:", retrievedAddUint8);
+
+// [Step] Update data (overwrite existing key)
+const updatedDataUint8 = new Uint8Array([9, 8, 7]);
+await vramDataBase.put("uint8Store", "Uint8Key", updatedDataUint8);
+
+// [Step] Use openCursor to view all key/value pairs
+for await (const record of vramDataBase.openCursor("uint8Store")) {
+	console.log(record.key, record.value);
+}
+
+// [Step] Delete a single record by key
+await vramDataBase.delete("uint8Store", "Uint8Key");
+
+// [Step] Delete the store
+vramDataBase.deleteObjectStore("uint8Store");
+```
+
+### Stress Testing
+
+1. Prepare Functions and Settings
+
+```typescript
+// Configuration for test stores and their options
+const config = [
+	{
+		name: "jsonStress",
+		options: {
+			dataType: "JSON",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "float32Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Float32Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "float64Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Float64Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "int32Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Int32Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "uint8Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Uint8Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+];
+
+function createJsonObject(bytes: number): object {
+	const baseObj = { type: "rand", randomVals: [] as number[] };
+	while (JSON.stringify(baseObj).length < bytes) {
+		baseObj.randomVals.push(Math.floor(Math.random() * 1000));
+	}
+	return baseObj;
+}
+```
+
+2. Write the Test Code
+
+```typescript
+// Array to store test results
+const results: {
+	store: string;
+	addRate: number;
+	putRate: number;
+	delRate: number;
+}[] = [];
+
+let totalAddOps = 0;
+let totalPutOps = 0;
+let totalDelOps = 0;
+
+for (const cfg of config) {
+	const { name, options } = cfg;
+	console.log(`[INFO] Creating store: ${name}`);
+	videoDB.createObjectStore(name, options);
+
+	// Create the data object
+	let dataObj: any = null;
+	if (options.dataType === "JSON") {
+		dataObj = createJsonObject(1024);
+	} else {
+		// Create a TypedArray with 256 numbers (1KB for float32/64, etc.)
+		const floatCount = 1024 / 4;
+		const typedArrayCtor = globalThis[options.typedArrayType] as any;
+		dataObj = new typedArrayCtor(floatCount);
+		for (let i = 0; i < floatCount; i++) {
+			dataObj[i] = Math.random() * 1000;
+		}
+	}
+
+	const testDurationSeconds = 5;
+
+	// ADD operation performance test
+	const addRate = await runPerfPhase(
+		name,
+		"add",
+		dataObj,
+		testDurationSeconds * 1000
+	);
+	const addOps = Math.floor(addRate * testDurationSeconds); // Approximate total ADD operations
+	totalAddOps += addOps;
+	await new Promise((resolve) => setTimeout(resolve, 250));
+
+	// PUT operation performance test
+	const putRate = await runPerfPhase(
+		name,
+		"put",
+		dataObj,
+		testDurationSeconds * 1000
+	);
+	const putOps = Math.floor(putRate * testDurationSeconds); // Approximate total PUT operations
+	totalPutOps += putOps;
+	await new Promise((resolve) => setTimeout(resolve, 250));
+
+	// DELETE operation performance test
+	const delRate = await runDeletePhase(name, testDurationSeconds * 1000);
+	const delOps = Math.floor(delRate * testDurationSeconds); // Approximate total DELETE operations
+	totalDelOps += delOps;
+	await new Promise((resolve) => setTimeout(resolve, 250));
+
+	results.push({ store: name, addRate, putRate, delRate });
+	await new Promise((resolve) => setTimeout(resolve, 500));
+}
+
+// Calculate total data processed (1KB per ADD/PUT operation)
+const totalDataKB = (totalAddOps + totalPutOps) * 1;
+
+let totalDataStr = "";
+if (totalDataKB >= 1024 * 1024) {
+	// 1GB = 1,048,576 KB
+	const totalDataGB = (totalDataKB / (1024 * 1024)).toFixed(2);
+	totalDataStr = `${totalDataGB} GB`;
+} else {
+	const totalDataMB = (totalDataKB / 1024).toFixed(2);
+	totalDataStr = `${totalDataMB} MB`;
+}
+
+// Print the performance results for each store
+for (const r of results) {
+	console.log(`${r.store}:`);
+	console.log(`ADD = ${r.addRate.toLocaleString()} rec/sec`);
+	console.log(`PUT = ${r.putRate.toLocaleString()} rec/sec`);
+	console.log(`DEL = ${r.delRate.toLocaleString()} rec/sec`);
+}
+```
+
+---
+
 ## Implementation Details
 
 -   **Batch Writes**: Gathers write operations in a `pendingWrites` queue and flushes them once the batch size is reached or the timer expires.

@@ -150,6 +150,376 @@ Json-VR-Cache/
 
 ---
 
+## 테스트
+
+### 사용자의 브라우저에서 WebGPU가 지원되는지 빠르게 확인하세요.
+
+```typescript
+const device = await getWebGpuDevice();
+
+if (!device) {
+	console.error("Failed to get GPU adapter.");
+	return;
+}
+```
+
+### 모든 데이터 타입의 저장소를 테스트 해보세요.
+
+```typescript
+// VramDataBase 생성
+const device = await getWebGpuDevice();
+const db = new VramDataBase(device);
+```
+
+```typescript
+// [단계] 스토어 생성: jsonStore
+vramDataBase.createObjectStore("jsonStore", {
+	dataType: "JSON",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [단계] 데이터 추가 (키가 이미 있으면 실패)
+const dataToAdd = { greeting: "Hello JSON Store!", time: 1738402167838 };
+await vramDataBase.add("jsonStore", "JsonKey", dataToAdd);
+
+// [단계] 데이터 조회
+const retrievedAdd = await vramDataBase.get("jsonStore", "JsonKey");
+console.log("추가 후 조회:", retrievedAdd);
+
+// [단계] 데이터 수정 (기존 키 덮어쓰기)
+const updatedData = { updatedField: "newValue", time: 1738402173462 };
+await vramDataBase.put("jsonStore", "JsonKey", updatedData);
+
+// [단계] OpenCursor를 사용하여 모든 키/값 보기
+for await (const record of vramDataBase.openCursor("jsonStore")) {
+	console.log(record.key, record.value);
+}
+
+// [단계] 특정 키를 가진 단일 레코드 삭제
+await vramDataBase.delete("jsonStore", "JsonKey");
+
+// [단계] 스토어 삭제
+vramDataBase.deleteObjectStore("jsonStore");
+
+// [단계] 스토어 생성: float32Store
+vramDataBase.createObjectStore("float32Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Float32Array",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [단계] 데이터 추가 (키가 이미 있으면 실패)
+const dataToAddFloat32 = new Float32Array([
+	1.1100000143051147, 2.2200000286102295, 3.3299999237060547,
+]);
+await vramDataBase.add("float32Store", "myFloat32Key", dataToAddFloat32);
+
+// [단계] 데이터 조회
+const retrievedAddFloat32 = await vramDataBase.get(
+	"float32Store",
+	"myFloat32Key"
+);
+console.log("추가 후 조회:", retrievedAddFloat32);
+
+// [단계] 데이터 수정 (기존 키 덮어쓰기)
+const updatedDataFloat32 = new Float32Array([9, 8, 7]);
+await vramDataBase.put("float32Store", "myFloat32Key", updatedDataFloat32);
+
+// [단계] OpenCursor를 사용하여 모든 키/값 보기
+for await (const record of vramDataBase.openCursor("float32Store")) {
+	console.log(record.key, record.value);
+}
+
+// [단계] 특정 키를 가진 단일 레코드 삭제
+await vramDataBase.delete("float32Store", "myFloat32Key");
+
+// [단계] 스토어 삭제
+vramDataBase.deleteObjectStore("float32Store");
+
+// [단계] 스토어 생성: float64Store
+vramDataBase.createObjectStore("float64Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Float64Array",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [단계] 데이터 추가 (키가 이미 있으면 실패)
+const dataToAddFloat64 = new Float64Array([10.01, 20.02, 30.03]);
+await vramDataBase.add("float64Store", "Float64Key", dataToAddFloat64);
+
+// [단계] 데이터 조회
+const retrievedAddFloat64 = await vramDataBase.get(
+	"float64Store",
+	"Float64Key"
+);
+console.log("추가 후 조회:", retrievedAddFloat64);
+
+// [단계] 데이터 수정 (기존 키 덮어쓰기)
+const updatedDataFloat64 = new Float64Array([9, 8, 7]);
+await vramDataBase.put("float64Store", "Float64Key", updatedDataFloat64);
+
+// [단계] OpenCursor를 사용하여 모든 키/값 보기
+for await (const record of vramDataBase.openCursor("float64Store")) {
+	console.log(record.key, record.value);
+}
+
+// [단계] 특정 키를 가진 단일 레코드 삭제
+await vramDataBase.delete("float64Store", "Float64Key");
+
+// [단계] 스토어 삭제
+vramDataBase.deleteObjectStore("float64Store");
+
+// [단계] 스토어 생성: int32Store
+vramDataBase.createObjectStore("int32Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Int32Array",
+	bufferSize: 2048000,
+	totalRows: 100,
+});
+
+// [단계] 데이터 추가 (키가 이미 있으면 실패)
+const dataToAddInt32 = new Int32Array([-1, 0, 99999]);
+await vramDataBase.add("int32Store", "Int32Key", dataToAddInt32);
+
+// [단계] 데이터 조회
+const retrievedAddInt32 = await vramDataBase.get("int32Store", "Int32Key");
+console.log("추가 후 조회:", retrievedAddInt32);
+
+// [단계] 데이터 수정 (기존 키 덮어쓰기)
+const updatedDataInt32 = new Int32Array([9, 8, 7]);
+await vramDataBase.put("int32Store", "Int32Key", updatedDataInt32);
+
+// [단계] OpenCursor를 사용하여 모든 키/값 보기
+for await (const record of vramDataBase.openCursor("int32Store")) {
+	console.log(record.key, record.value);
+}
+
+// [단계] 특정 키를 가진 단일 레코드 삭제
+await vramDataBase.delete("int32Store", "Int32Key");
+
+// [단계] 스토어 삭제
+vramDataBase.deleteObjectStore("int32Store");
+
+// [단계] 스토어 생성: uint32Store
+vramDataBase.createObjectStore("uint32Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Uint32Array",
+	bufferSize: 1048576,
+	totalRows: 50,
+});
+
+// [단계] 데이터 추가 (키가 이미 있으면 실패)
+const dataToAddUint32 = new Uint32Array([1, 2, 3]);
+await vramDataBase.add("uint32Store", "Uint32Key", dataToAddUint32);
+
+// [단계] 데이터 조회
+const retrievedAddUint32 = await vramDataBase.get("uint32Store", "Uint32Key");
+console.log("추가 후 조회:", retrievedAddUint32);
+
+// [단계] 데이터 수정 (기존 키 덮어쓰기)
+const updatedDataUint32 = new Uint32Array([1, 2, 3]);
+await vramDataBase.put("uint32Store", "Uint32Key", updatedDataUint32);
+
+// [단계] OpenCursor를 사용하여 모든 키/값 보기
+for await (const record of vramDataBase.openCursor("uint32Store")) {
+	console.log(record.key, record.value);
+}
+
+// [단계] 특정 키를 가진 단일 레코드 삭제
+await vramDataBase.delete("uint32Store", "Uint32Key");
+
+// [단계] 스토어 삭제
+vramDataBase.deleteObjectStore("uint32Store");
+
+// [단계] 스토어 생성: uint8Store
+vramDataBase.createObjectStore("uint8Store", {
+	dataType: "TypedArray",
+	typedArrayType: "Uint8Array",
+	bufferSize: 2048000,
+	totalRows: 100,
+});
+
+// [단계] 데이터 추가 (키가 이미 있으면 실패)
+const dataToAddUint8 = new Uint8Array([0, 255, 128, 64]);
+await vramDataBase.add("uint8Store", "Uint8Key", dataToAddUint8);
+
+// [단계] 데이터 조회
+const retrievedAddUint8 = await vramDataBase.get("uint8Store", "Uint8Key");
+console.log("추가 후 조회:", retrievedAddUint8);
+
+// [단계] 데이터 수정 (기존 키 덮어쓰기)
+const updatedDataUint8 = new Uint8Array([9, 8, 7]);
+await vramDataBase.put("uint8Store", "Uint8Key", updatedDataUint8);
+
+// [단계] OpenCursor를 사용하여 모든 키/값 보기
+for await (const record of vramDataBase.openCursor("uint8Store")) {
+	console.log(record.key, record.value);
+}
+
+// [단계] 특정 키를 가진 단일 레코드 삭제
+await vramDataBase.delete("uint8Store", "Uint8Key");
+
+// [단계] 스토어 삭제
+vramDataBase.deleteObjectStore("uint8Store");
+```
+
+### 부하 테스트를 시도해보세요.
+
+1. 함수와 설정을 준비하세요.
+
+```typescript
+// 테스트 대상 스토어와 각 스토어의 옵션 설정
+const config = [
+	{
+		name: "jsonStress",
+		options: {
+			dataType: "JSON",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "float32Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Float32Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "float64Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Float64Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "int32Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Int32Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+	{
+		name: "uint8Stress",
+		options: {
+			dataType: "TypedArray",
+			typedArrayType: "Uint8Array",
+			bufferSize: 50 * 1024 * 1024,
+			totalRows: 200000,
+		},
+	},
+];
+
+function createJsonObject(bytes: number): object {
+	const baseObj = { type: "rand", randomVals: [] as number[] };
+	while (JSON.stringify(baseObj).length < bytes) {
+		baseObj.randomVals.push(Math.floor(Math.random() * 1000));
+	}
+	return baseObj;
+}
+```
+
+2. 테스트 코드를 작성하세요.
+
+```typescript
+// 테스트 결과를 저장할 배열
+const results: {
+	store: string;
+	addRate: number;
+	putRate: number;
+	delRate: number;
+}[] = [];
+
+let totalAddOps = 0;
+let totalPutOps = 0;
+let totalDelOps = 0;
+
+for (const cfg of config) {
+	const { name, options } = cfg;
+	console.log(`[INFO] Creating store: ${name}`);
+	videoDB.createObjectStore(name, options);
+
+	// 데이터 객체 생성
+	let dataObj: any = null;
+	if (options.dataType === "JSON") {
+		dataObj = createJsonObject(1024);
+	} else {
+		// 1KB 데이터를 위해 1024/4 = 256개의 숫자 배열 생성 (Float32Array, Float64Array 등)
+		const floatCount = 1024 / 4;
+		const typedArrayCtor = globalThis[options.typedArrayType] as any;
+		dataObj = new typedArrayCtor(floatCount);
+		for (let i = 0; i < floatCount; i++) {
+			dataObj[i] = Math.random() * 1000;
+		}
+	}
+
+	const testDurationSeconds = 5;
+
+	// ADD 작업 성능 테스트
+	const addRate = await runPerfPhase(
+		name,
+		"add",
+		dataObj,
+		testDurationSeconds * 1000
+	);
+	const addOps = Math.floor(addRate * testDurationSeconds); // 대략적인 총 ADD 횟수
+	totalAddOps += addOps;
+	await new Promise((resolve) => setTimeout(resolve, 250));
+
+	// PUT 작업 성능 테스트
+	const putRate = await runPerfPhase(
+		name,
+		"put",
+		dataObj,
+		testDurationSeconds * 1000
+	);
+	const putOps = Math.floor(putRate * testDurationSeconds); // 대략적인 총 PUT 횟수
+	totalPutOps += putOps;
+	await new Promise((resolve) => setTimeout(resolve, 250));
+
+	// DELETE 작업 성능 테스트
+	const delRate = await runDeletePhase(name, testDurationSeconds * 1000);
+	const delOps = Math.floor(delRate * testDurationSeconds); // 대략적인 총 DELETE 횟수
+	totalDelOps += delOps;
+	await new Promise((resolve) => setTimeout(resolve, 250));
+
+	results.push({ store: name, addRate, putRate, delRate });
+	await new Promise((resolve) => setTimeout(resolve, 500));
+}
+
+// 총 데이터 처리량 계산 (ADD 및 PUT 작업 기준, 각 작업당 1KB 처리)
+const totalDataKB = (totalAddOps + totalPutOps) * 1;
+
+let totalDataStr = "";
+if (totalDataKB >= 1024 * 1024) {
+	// 1GB = 1,048,576 KB
+	const totalDataGB = (totalDataKB / (1024 * 1024)).toFixed(2);
+	totalDataStr = `${totalDataGB} GB`;
+} else {
+	const totalDataMB = (totalDataKB / 1024).toFixed(2);
+	totalDataStr = `${totalDataMB} MB`;
+}
+
+// 각 스토어의 성능 결과 출력
+for (const r of results) {
+	console.log(`${r.store}:`);
+	console.log(`ADD = ${r.addRate.toLocaleString()} rec/sec`);
+	console.log(`PUT = ${r.putRate.toLocaleString()} rec/sec`);
+	console.log(`DEL = ${r.delRate.toLocaleString()} rec/sec`);
+}
+```
+
+---
+
 ## 내부 동작 (Implementation Details)
 
 **한국어(KR)**
@@ -171,5 +541,5 @@ Json-VR-Cache/
 
 ## 라이선스 (License)
 
-**[Apache-2.0 license](LICENSE)**  
+**[GNU General Public License (GPLv2)](LICENSE)**  
 자세한 내용은 `LICENSE` 파일을 참고하세요.

@@ -102,7 +102,7 @@ export function useJsonDB(storeName: string, options?: IDBOptions) {
 
 				const device = await getWebGpuDevice();
 				const db = new VramDataBase(device);
-				db.createObjectStore(
+				db.StoreManager.createObjectStore(
 					storeName,
 					options ?? {
 						dataType: "JSON",

@@ -13,6 +13,7 @@ export async function getWebGpuDevice(): Promise<GPUDevice> {
 	}
 	return await adapter.requestDevice();
 }
+
 const PROXY_FLAG = Symbol("isProxy");
 
 export interface JsonGpuStoreOptions {
@@ -23,7 +24,7 @@ export class JsonGpuStore<T extends object> {
 	private vramDB: VramDataBase | null = null;
 	private storeName: string;
 	private key: string;
-	// 내부 캐시: 최초에는 초기 데이터를 복제한 객체를 보관합니다.
+	// 내부 캐시: 초기에는 초기 데이터를 복제한 객체 혹은 그대로 보관합니다.
 	private cache: T | object;
 	private proxy: T;
 	// 해당 레코드가 VRAM에 등록되었는지 여부 플래그
@@ -34,10 +35,17 @@ export class JsonGpuStore<T extends object> {
 	private useDebounce: boolean;
 
 	/**
+	 * plain object인지 여부를 판단합니다.
+	 */
+	private isPlainObject(obj: any): boolean {
+		return Object.prototype.toString.call(obj) === "[object Object]";
+	}
+
+	/**
 	 * JsonGpuStore 생성자
 	 * @param storeName 스토어 이름
 	 * @param key 저장할 키 값
-	 * @param initialData 초기 데이터 (JSON 형태)
+	 * @param initialData 초기 데이터 (JSON 또는 클래스 인스턴스 등)
 	 * @param options 추가 옵션 (debounce: true|false)
 	 */
 	constructor(
@@ -48,7 +56,12 @@ export class JsonGpuStore<T extends object> {
 	) {
 		this.storeName = storeName;
 		this.key = key;
-		this.cache = structuredClone(initialData);
+		// 만약 초기 데이터가 plain object라면 clone하여 사용하고,
+		// 그렇지 않다면 (예: new Entity({data:data})로 생성된 클래스 인스턴스)
+		// 그대로 사용하여 proxy를 씌웁니다.
+		this.cache = this.isPlainObject(initialData)
+			? structuredClone(initialData)
+			: initialData;
 		this.proxy = this.createProxy(this.cache);
 		this.useDebounce = options?.debounce ?? true;
 	}
@@ -124,6 +137,9 @@ export class JsonGpuStore<T extends object> {
 	 * - 재귀적으로 중첩 객체에 대해 proxy를 생성합니다.
 	 * - 새로 설정되는 객체도 자동으로 프록시 처리합니다.
 	 * - 변경 시 scheduleUpdate()를 호출하여 VRAM에 반영합니다.
+	 *
+	 * 클래스 인스턴스(예: new Entity({data:data}))의 경우에도
+	 * 동일하게 Proxy를 적용하여 필드 접근/수정 시 자동 업데이트가 가능하도록 합니다.
 	 */
 	private createProxy(obj: any, path: string[] = []): T {
 		if (obj && typeof obj === "object") {
@@ -132,6 +148,9 @@ export class JsonGpuStore<T extends object> {
 				get(target, prop, receiver) {
 					if (prop === PROXY_FLAG) return true;
 					const value = Reflect.get(target, prop, receiver);
+					// 함수는 그대로 반환 (클래스 메서드 등)
+					if (typeof value === "function")
+						return value.bind(receiver);
 					if (
 						value &&
 						typeof value === "object" &&

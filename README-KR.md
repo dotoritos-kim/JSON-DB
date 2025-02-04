@@ -66,7 +66,9 @@ npm run build
 
 ```ts
 const initialData = { count: 0, nested: { value: 10 } };
-const jsonGpu = new JsonGpuStore("HighLevelStore", "myKey", initialData);
+const jsonGpu = new JsonGpuStore("HighLevelStore", "myKey", initialData, {
+	debounce: false,
+});
 
 await jsonGPU.init({
 	dataType: "JSON",

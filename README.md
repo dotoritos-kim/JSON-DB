@@ -1,5 +1,7 @@
 # Json-VR-Cache
 
+![Json-VR-Cache](favicon.ico)
+
 [README-EN](https://github.com/dotoritos-kim/Json-VR-Cache/blob/main/README.md)
 
 [README-KR](https://github.com/dotoritos-kim/Json-VR-Cache/blob/main/README-KR.md)
@@ -137,7 +139,7 @@ export function useJsonDB(storeName: string, options?: IDBOptions) {
 
 ```plaintext
 Json-VR-Cache/
-├── VramDataBase.ts       # Core WebGPU-based database logic
+├── vramDataBase.ts       # Core WebGPU-based database logic
 ├── JsonGpuStore.ts       # Proxy-based JSON management
 ├── types
 │   └── StoreMetadata.ts  # Type definitions & interfaces
@@ -171,7 +173,7 @@ const db = new VramDataBase(device);
 
 ```typescript
 // [Step] Create a store: jsonStore
-vramDataBase.createObjectStore("jsonStore", {
+vramDataBase.StoreManager.createObjectStore("jsonStore", {
 	dataType: "JSON",
 	bufferSize: 1048576,
 	totalRows: 50,
@@ -179,29 +181,32 @@ vramDataBase.createObjectStore("jsonStore", {
 
 // [Step] Add data (fails if the key already exists)
 const dataToAdd = { greeting: "Hello JSON Store!", time: 1738402167838 };
-await vramDataBase.add("jsonStore", "JsonKey", dataToAdd);
+await vramDataBase.StoreManager.add("jsonStore", "JsonKey", dataToAdd);
 
 // [Step] Retrieve data
-const retrievedAdd = await vramDataBase.get("jsonStore", "JsonKey");
+const retrievedAdd = await vramDataBase.StoreManager.get(
+	"jsonStore",
+	"JsonKey"
+);
 console.log("Retrieved after add:", retrievedAdd);
 
 // [Step] Update data (overwrite existing key)
 const updatedData = { updatedField: "newValue", time: 1738402173462 };
-await vramDataBase.put("jsonStore", "JsonKey", updatedData);
+await vramDataBase.StoreManager.put("jsonStore", "JsonKey", updatedData);
 
 // [Step] Use openCursor to view all key/value pairs
-for await (const record of vramDataBase.openCursor("jsonStore")) {
+for await (const record of vramDataBase.StoreManager.openCursor("jsonStore")) {
 	console.log(record.key, record.value);
 }
 
 // [Step] Delete a single record by key
-await vramDataBase.delete("jsonStore", "JsonKey");
+await vramDataBase.StoreManager.delete("jsonStore", "JsonKey");
 
 // [Step] Delete the store
-vramDataBase.deleteObjectStore("jsonStore");
+vramDataBase.StoreManager.deleteObjectStore("jsonStore");
 
 // [Step] Create a store: float32Store
-vramDataBase.createObjectStore("float32Store", {
+vramDataBase.StoreManager.createObjectStore("float32Store", {
 	dataType: "TypedArray",
 	typedArrayType: "Float32Array",
 	bufferSize: 1048576,
@@ -212,10 +217,14 @@ vramDataBase.createObjectStore("float32Store", {
 const dataToAddFloat32 = new Float32Array([
 	1.1100000143051147, 2.2200000286102295, 3.3299999237060547,
 ]);
-await vramDataBase.add("float32Store", "myFloat32Key", dataToAddFloat32);
+await vramDataBase.StoreManager.add(
+	"float32Store",
+	"myFloat32Key",
+	dataToAddFloat32
+);
 
 // [Step] Retrieve data
-const retrievedAddFloat32 = await vramDataBase.get(
+const retrievedAddFloat32 = await vramDataBase.StoreManager.get(
 	"float32Store",
 	"myFloat32Key"
 );
@@ -223,21 +232,27 @@ console.log("Retrieved after add:", retrievedAddFloat32);
 
 // [Step] Update data (overwrite existing key)
 const updatedDataFloat32 = new Float32Array([9, 8, 7]);
-await vramDataBase.put("float32Store", "myFloat32Key", updatedDataFloat32);
+await vramDataBase.StoreManager.put(
+	"float32Store",
+	"myFloat32Key",
+	updatedDataFloat32
+);
 
 // [Step] Use openCursor to view all key/value pairs
-for await (const record of vramDataBase.openCursor("float32Store")) {
+for await (const record of vramDataBase.StoreManager.openCursor(
+	"float32Store"
+)) {
 	console.log(record.key, record.value);
 }
 
 // [Step] Delete a single record by key
-await vramDataBase.delete("float32Store", "myFloat32Key");
+await vramDataBase.StoreManager.delete("float32Store", "myFloat32Key");
 
 // [Step] Delete the store
-vramDataBase.deleteObjectStore("float32Store");
+vramDataBase.StoreManager.deleteObjectStore("float32Store");
 
 // [Step] Create a store: float64Store
-vramDataBase.createObjectStore("float64Store", {
+vramDataBase.StoreManager.createObjectStore("float64Store", {
 	dataType: "TypedArray",
 	typedArrayType: "Float64Array",
 	bufferSize: 1048576,
@@ -246,10 +261,14 @@ vramDataBase.createObjectStore("float64Store", {
 
 // [Step] Add data (fails if the key already exists)
 const dataToAddFloat64 = new Float64Array([10.01, 20.02, 30.03]);
-await vramDataBase.add("float64Store", "Float64Key", dataToAddFloat64);
+await vramDataBase.StoreManager.add(
+	"float64Store",
+	"Float64Key",
+	dataToAddFloat64
+);
 
 // [Step] Retrieve data
-const retrievedAddFloat64 = await vramDataBase.get(
+const retrievedAddFloat64 = await vramDataBase.StoreManager.get(
 	"float64Store",
 	"Float64Key"
 );
@@ -257,21 +276,27 @@ console.log("Retrieved after add:", retrievedAddFloat64);
 
 // [Step] Update data (overwrite existing key)
 const updatedDataFloat64 = new Float64Array([9, 8, 7]);
-await vramDataBase.put("float64Store", "Float64Key", updatedDataFloat64);
+await vramDataBase.StoreManager.put(
+	"float64Store",
+	"Float64Key",
+	updatedDataFloat64
+);
 
 // [Step] Use openCursor to view all key/value pairs
-for await (const record of vramDataBase.openCursor("float64Store")) {
+for await (const record of vramDataBase.StoreManager.openCursor(
+	"float64Store"
+)) {
 	console.log(record.key, record.value);
 }
 
 // [Step] Delete a single record by key
-await vramDataBase.delete("float64Store", "Float64Key");
+await vramDataBase.StoreManager.delete("float64Store", "Float64Key");
 
 // [Step] Delete the store
-vramDataBase.deleteObjectStore("float64Store");
+vramDataBase.StoreManager.deleteObjectStore("float64Store");
 
 // [Step] Create a store: int32Store
-vramDataBase.createObjectStore("int32Store", {
+vramDataBase.StoreManager.createObjectStore("int32Store", {
 	dataType: "TypedArray",
 	typedArrayType: "Int32Array",
 	bufferSize: 2048000,
@@ -280,29 +305,32 @@ vramDataBase.createObjectStore("int32Store", {
 
 // [Step] Add data (fails if the key already exists)
 const dataToAddInt32 = new Int32Array([-1, 0, 99999]);
-await vramDataBase.add("int32Store", "Int32Key", dataToAddInt32);
+await vramDataBase.StoreManager.add("int32Store", "Int32Key", dataToAddInt32);
 
 // [Step] Retrieve data
-const retrievedAddInt32 = await vramDataBase.get("int32Store", "Int32Key");
+const retrievedAddInt32 = await vramDataBase.StoreManager.get(
+	"int32Store",
+	"Int32Key"
+);
 console.log("Retrieved after add:", retrievedAddInt32);
 
 // [Step] Update data (overwrite existing key)
 const updatedDataInt32 = new Int32Array([9, 8, 7]);
-await vramDataBase.put("int32Store", "Int32Key", updatedDataInt32);
+await vramDataBase.StoreManager.put("int32Store", "Int32Key", updatedDataInt32);
 
 // [Step] Use openCursor to view all key/value pairs
-for await (const record of vramDataBase.openCursor("int32Store")) {
+for await (const record of vramDataBase.StoreManager.openCursor("int32Store")) {
 	console.log(record.key, record.value);
 }
 
 // [Step] Delete a single record by key
-await vramDataBase.delete("int32Store", "Int32Key");
+await vramDataBase.StoreManager.delete("int32Store", "Int32Key");
 
 // [Step] Delete the store
-vramDataBase.deleteObjectStore("int32Store");
+vramDataBase.StoreManager.deleteObjectStore("int32Store");
 
 // [Step] Create a store: uint32Store
-vramDataBase.createObjectStore("uint32Store", {
+vramDataBase.StoreManager.createObjectStore("uint32Store", {
 	dataType: "TypedArray",
 	typedArrayType: "Uint32Array",
 	bufferSize: 1048576,
@@ -311,29 +339,42 @@ vramDataBase.createObjectStore("uint32Store", {
 
 // [Step] Add data (fails if the key already exists)
 const dataToAddUint32 = new Uint32Array([1, 2, 3]);
-await vramDataBase.add("uint32Store", "Uint32Key", dataToAddUint32);
+await vramDataBase.StoreManager.add(
+	"uint32Store",
+	"Uint32Key",
+	dataToAddUint32
+);
 
 // [Step] Retrieve data
-const retrievedAddUint32 = await vramDataBase.get("uint32Store", "Uint32Key");
+const retrievedAddUint32 = await vramDataBase.StoreManager.get(
+	"uint32Store",
+	"Uint32Key"
+);
 console.log("Retrieved after add:", retrievedAddUint32);
 
 // [Step] Update data (overwrite existing key)
 const updatedDataUint32 = new Uint32Array([1, 2, 3]);
-await vramDataBase.put("uint32Store", "Uint32Key", updatedDataUint32);
+await vramDataBase.StoreManager.put(
+	"uint32Store",
+	"Uint32Key",
+	updatedDataUint32
+);
 
 // [Step] Use openCursor to view all key/value pairs
-for await (const record of vramDataBase.openCursor("uint32Store")) {
+for await (const record of vramDataBase.StoreManager.openCursor(
+	"uint32Store"
+)) {
 	console.log(record.key, record.value);
 }
 
 // [Step] Delete a single record by key
-await vramDataBase.delete("uint32Store", "Uint32Key");
+await vramDataBase.StoreManager.delete("uint32Store", "Uint32Key");
 
 // [Step] Delete the store
-vramDataBase.deleteObjectStore("uint32Store");
+vramDataBase.StoreManager.deleteObjectStore("uint32Store");
 
 // [Step] Create a store: uint8Store
-vramDataBase.createObjectStore("uint8Store", {
+vramDataBase.StoreManager.createObjectStore("uint8Store", {
 	dataType: "TypedArray",
 	typedArrayType: "Uint8Array",
 	bufferSize: 2048000,
@@ -342,26 +383,29 @@ vramDataBase.createObjectStore("uint8Store", {
 
 // [Step] Add data (fails if the key already exists)
 const dataToAddUint8 = new Uint8Array([0, 255, 128, 64]);
-await vramDataBase.add("uint8Store", "Uint8Key", dataToAddUint8);
+await vramDataBase.StoreManager.add("uint8Store", "Uint8Key", dataToAddUint8);
 
 // [Step] Retrieve data
-const retrievedAddUint8 = await vramDataBase.get("uint8Store", "Uint8Key");
+const retrievedAddUint8 = await vramDataBase.StoreManager.get(
+	"uint8Store",
+	"Uint8Key"
+);
 console.log("Retrieved after add:", retrievedAddUint8);
 
 // [Step] Update data (overwrite existing key)
 const updatedDataUint8 = new Uint8Array([9, 8, 7]);
-await vramDataBase.put("uint8Store", "Uint8Key", updatedDataUint8);
+await vramDataBase.StoreManager.put("uint8Store", "Uint8Key", updatedDataUint8);
 
 // [Step] Use openCursor to view all key/value pairs
-for await (const record of vramDataBase.openCursor("uint8Store")) {
+for await (const record of vramDataBase.StoreManager.openCursor("uint8Store")) {
 	console.log(record.key, record.value);
 }
 
 // [Step] Delete a single record by key
-await vramDataBase.delete("uint8Store", "Uint8Key");
+await vramDataBase.StoreManager.delete("uint8Store", "Uint8Key");
 
 // [Step] Delete the store
-vramDataBase.deleteObjectStore("uint8Store");
+vramDataBase.StoreManager.deleteObjectStore("uint8Store");
 ```
 
 ### Stress Testing
